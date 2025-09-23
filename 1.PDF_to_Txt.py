@@ -3,13 +3,14 @@ import os
 import google.generativeai as genai
 from PIL import Image
 from pdf2image import convert_from_path
+from config import config
 
 # 🌱 Load environment variables from .env
 load_dotenv()
 
 # 🔐 Get API key securely from environment
-API_KEY = os.getenv("GEMINI_API_KEY")
-if not API_KEY:
+API_KEY = config.GEMINI_API_KEY
+if not API_KEY or API_KEY == "your_gemini_api_key_here":
     raise EnvironmentError("❌ GEMINI_API_KEY not set in .env file.")
 
 genai.configure(api_key=API_KEY)
@@ -24,7 +25,7 @@ def convert_pdf_to_images(pdf_path):
 
 # 🧠 Perform OCR on a single image using Gemini 1.5 Flash
 def ocr_image(image, page_number):
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel(config.GEMINI_MODEL)
     prompt = f"""
     Extract ALL text visible in this invoice image (page {page_number}).
     Include every line of text exactly as it appears.
@@ -74,6 +75,11 @@ def batch_ocr(input_dir, output_dir):
 
 # 🧪 Main entry
 if __name__ == "__main__":
-    input_dir = r"C:\Users\george.nadrag\00. Coduri structurate\01. Gemini OCR PDF to TXT\IN"
-    output_dir = r"C:\Users\george.nadrag\00. Coduri structurate\01. Gemini OCR PDF to TXT\OUT"
+    # Use paths from config
+    input_dir = config.PDF_INPUT_DIR
+    output_dir = config.PDF_OUTPUT_DIR
+    
+    print(f"📁 Input directory: {input_dir}")
+    print(f"📁 Output directory: {output_dir}")
+    
     batch_ocr(input_dir, output_dir)

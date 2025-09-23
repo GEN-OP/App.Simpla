@@ -3,10 +3,11 @@ import os
 from dateutil.rrule import rrule, MONTHLY
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from config import config
 
 # Paths
-input_excel_path = r"C:\Users\george.nadrag\00. Coduri structurate\04. Date si validare XLSX\4.transformed_data.xlsx"
-output_excel_path = r"C:\Users\george.nadrag\00. Coduri structurate\05. Monthly Split Logic\5.expanded_monthly_rows.xlsx"
+input_excel_path = config.MONTHLY_INPUT
+output_excel_path = os.path.join(config.MONTHLY_OUTPUT, "5.expanded_monthly_rows.xlsx")
 os.makedirs(os.path.dirname(output_excel_path), exist_ok=True)
 
 COLUMNS_TO_DROP = [

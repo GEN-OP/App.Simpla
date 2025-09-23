@@ -6,12 +6,13 @@ import time
 import pandas as pd
 import google.generativeai as genai
 from dotenv import load_dotenv
+from config import config
 
 # Load environment variables from .env
 load_dotenv()
 
-API_KEY = os.getenv("GEMINI_API_KEY")
-if not API_KEY:
+API_KEY = config.GEMINI_API_KEY
+if not API_KEY or API_KEY == "your_gemini_api_key_here":
     raise EnvironmentError("❌ GEMINI_API_KEY not set in .env file.")
 
 genai.configure(api_key=API_KEY)
@@ -27,7 +28,7 @@ def extract_invoice_details(text, filename):
     Returns:
         dict: Structured invoice data with confidence scores
     """
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel(config.GEMINI_MODEL)
     prompt = f"""
     Extract the following invoice details from the text below. Return ONLY a valid JSON object.
     For each field, include a confidence score from 1-10 where 10 means you're absolutely certain and 1 means you're very uncertain.
@@ -286,7 +287,7 @@ def process_txt_to_excel(input_dir, output_dir, batch_size=5, delay_seconds=1):
     existing_columns = [col for col in columns if col in df.columns]
     df = df[existing_columns]
     # Add full path hyperlink to original PDF
-    pdf_base_path = r"C:\Users\george.nadrag\00. Coduri structurate\01. Gemini OCR PDF to TXT\IN"
+    pdf_base_path = config.PDF_INPUT_DIR
     df['path'] = df['pdf_name'].apply(
         lambda name: f'=HYPERLINK("{os.path.join(pdf_base_path, name.replace("_ocr", "") + ".pdf")}", "{name.replace("_ocr", "")}.pdf")'
     )
@@ -310,8 +311,8 @@ def process_txt_to_excel(input_dir, output_dir, batch_size=5, delay_seconds=1):
 
 # Main execution
 if __name__ == "__main__":
-    input_dir = r"C:\Users\george.nadrag\00. Coduri structurate\01. Gemini OCR PDF to TXT\OUT"
-    output_dir = r"C:\Users\george.nadrag\00. Coduri structurate\02. Structurare TXT to XLSX"
+    input_dir = config.TXT_INPUT_DIR
+    output_dir = config.XLSX_OUTPUT_DIR
     
     print("Starting invoice extraction process...")
     output_file = process_txt_to_excel(input_dir, output_dir)

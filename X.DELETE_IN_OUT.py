@@ -1,8 +1,9 @@
 import os
+from config import config
 
 # Define your folders
-in_dir = r"C:\Users\george.nadrag\00. Coduri structurate\01. Gemini OCR PDF to TXT\IN"
-out_dir = r"C:\Users\george.nadrag\00. Coduri structurate\01. Gemini OCR PDF to TXT\OUT"
+in_dir = config.PDF_INPUT_DIR
+out_dir = config.PDF_OUTPUT_DIR
 
 # Confirm action
 confirm = input(f"⚠️ WARNING: This will delete ALL PDFs in:\n{in_dir}\nand ALL TXT files in:\n{out_dir}\n\nType 'yes' to confirm: ")

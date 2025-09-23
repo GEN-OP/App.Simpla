@@ -11,29 +11,30 @@ import concurrent.futures
 import time
 import google.generativeai as genai
 from dotenv import load_dotenv
+from config import config
 from dateutil.relativedelta import relativedelta
 from tqdm import tqdm
 
 # Load API key
 load_dotenv()
-API_KEY = os.getenv("GEMINI_API_KEY")
-if not API_KEY:
+API_KEY = config.GEMINI_API_KEY
+if not API_KEY or API_KEY == "your_gemini_api_key_here":
     raise EnvironmentError("❌ GEMINI_API_KEY not set.")
 genai.configure(api_key=API_KEY)
 
 # Paths
-input_excel = r"C:\Users\george.nadrag\00. Coduri structurate\02. Structurare TXT to XLSX\2.structured_extract.xlsx"
-out_base = r"C:\Users\george.nadrag\00. Coduri structurate\04. Date si validare XLSX"
+input_excel = config.DATE_VALIDATION_INPUT
+out_base = config.DATE_VALIDATION_OUTPUT
 output_excel = os.path.join(out_base, "4.transformed_data.xlsx")
 
 # Settings
-BATCH_SIZE = 10
-API_DELAY = 2
-MAX_RETRIES = 3
+BATCH_SIZE = config.API_BATCH_SIZE
+API_DELAY = config.API_DELAY_SECONDS
+MAX_RETRIES = config.API_MAX_RETRIES
 DEBUG_MODE = False
 service_dates_cache = {}
 
-model = genai.GenerativeModel('gemini-1.5-flash')
+model = genai.GenerativeModel(config.GEMINI_MODEL)
 
 def parse_invoice_date(date_str):
     if pd.isna(date_str) or date_str == "":
@@ -172,7 +173,7 @@ def main():
 
     df['path'] = df.apply(
         lambda row: row['path'] if isinstance(row.get('path'), str) and row['path'].startswith('=HYPERLINK')
-        else f'=HYPERLINK("C:/Users/george.nadrag/00. Coduri structurate/01. Gemini OCR PDF to TXT/IN/{row["pdf_name"].replace("_ocr", "")}.pdf", "{row["pdf_name"].replace("_ocr", "")}.pdf")',
+        else f'=HYPERLINK("{config.PDF_INPUT_DIR}/{row["pdf_name"].replace("_ocr", "")}.pdf", "{row["pdf_name"].replace("_ocr", "")}.pdf")',
         axis=1
     )
 

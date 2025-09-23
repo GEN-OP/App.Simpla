@@ -7,11 +7,12 @@ import shutil
 import pandas as pd
 import concurrent.futures
 from tqdm import tqdm
+from config import config
 
 # Paths
-excel_path = r"C:\Users\george.nadrag\00. Coduri structurate\02. Structurare TXT to XLSX\2.structured_extract.xlsx"
-pdf_dir = r"C:\Users\george.nadrag\00. Coduri structurate\01. Gemini OCR PDF to TXT\IN"
-out_base = r"C:\Users\george.nadrag\00. Coduri structurate\03. PDF_Copy doc suport"
+excel_path = config.EXCEL_PATH
+pdf_dir = config.PDF_INPUT_DIR
+out_base = config.PDF_COPY_BASE_DIR
 
 # Create output folders
 considered_dir = os.path.join(out_base, "Considered")
