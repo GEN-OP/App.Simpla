@@ -13,6 +13,37 @@ class Config:
     """Configuration class for the Workflow Procesare application"""
     
     # ===========================================
+    # DYNAMIC PATH CONFIGURATION
+    # ===========================================
+    
+    # Get the directory where this config.py file is located
+    CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+    
+    # Base directories - dynamic paths relative to config.py location
+    BASE_PATH = os.getenv("BASE_PATH", os.path.join(CURRENT_DIR, "Data-IN-OUT"))
+    PROJECT_PATH = os.getenv("PROJECT_PATH", CURRENT_DIR)
+    
+    # Step 1 - PDF to TXT
+    PDF_INPUT_DIR = os.getenv("PDF_INPUT_DIR", os.path.join(BASE_PATH, "01. Gemini OCR PDF to TXT", "IN"))
+    PDF_OUTPUT_DIR = os.getenv("PDF_OUTPUT_DIR", os.path.join(BASE_PATH, "01. Gemini OCR PDF to TXT", "OUT"))
+    
+    # Step 2 - TXT to XLSX
+    TXT_INPUT_DIR = os.getenv("TXT_INPUT_DIR", os.path.join(BASE_PATH, "01. Gemini OCR PDF to TXT", "OUT"))
+    XLSX_OUTPUT_DIR = os.getenv("XLSX_OUTPUT_DIR", os.path.join(BASE_PATH, "02. Structurare TXT to XLSX"))
+    
+    # Step 3 - PDF Copy
+    EXCEL_PATH = os.getenv("EXCEL_PATH", os.path.join(BASE_PATH, "02. Structurare TXT to XLSX", "2.structured_extract.xlsx"))
+    PDF_COPY_BASE_DIR = os.getenv("PDF_COPY_BASE_DIR", os.path.join(BASE_PATH, "03. PDF_Copy doc suport"))
+    
+    # Step 4 - Date Validation
+    DATE_VALIDATION_INPUT = os.getenv("DATE_VALIDATION_INPUT", os.path.join(BASE_PATH, "02. Structurare TXT to XLSX", "2.structured_extract.xlsx"))
+    DATE_VALIDATION_OUTPUT = os.getenv("DATE_VALIDATION_OUTPUT", os.path.join(BASE_PATH, "04. Date si validare XLSX"))
+    
+    # Step 5 - Monthly Expansion
+    MONTHLY_INPUT = os.getenv("MONTHLY_INPUT", os.path.join(BASE_PATH, "04. Date si validare XLSX", "4.transformed_data.xlsx"))
+    MONTHLY_OUTPUT = os.getenv("MONTHLY_OUTPUT", os.path.join(BASE_PATH, "05. Monthly Split Logic"))
+    
+    # ===========================================
     # API CONFIGURATION
     # ===========================================
     
@@ -24,34 +55,6 @@ class Config:
     API_BATCH_SIZE = int(os.getenv("API_BATCH_SIZE", "10"))
     API_DELAY_SECONDS = int(os.getenv("API_DELAY_SECONDS", "2"))
     API_MAX_RETRIES = int(os.getenv("API_MAX_RETRIES", "3"))
-    
-    # ===========================================
-    # PATH CONFIGURATION
-    # ===========================================
-    
-    # Base directories
-    BASE_PATH = os.getenv("BASE_PATH", r"C:\Users\george.nadrag\01.Cursor_WF\workflow.procesare\App.Simpla\Data-IN-OUT")
-    PROJECT_PATH = os.getenv("PROJECT_PATH", r"C:\Users\george.nadrag\01.Cursor_WF\workflow.procesare\App.Simpla")
-    
-    # Step 1 - PDF to TXT
-    PDF_INPUT_DIR = os.getenv("PDF_INPUT_DIR", r"C:\Users\george.nadrag\01.Cursor_WF\workflow.procesare\App.Simpla\Data-IN-OUT\01. Gemini OCR PDF to TXT\IN")
-    PDF_OUTPUT_DIR = os.getenv("PDF_OUTPUT_DIR", r"C:\Users\george.nadrag\01.Cursor_WF\workflow.procesare\App.Simpla\Data-IN-OUT\01. Gemini OCR PDF to TXT\OUT")
-    
-    # Step 2 - TXT to XLSX
-    TXT_INPUT_DIR = os.getenv("TXT_INPUT_DIR", r"C:\Users\george.nadrag\01.Cursor_WF\workflow.procesare\App.Simpla\Data-IN-OUT\01. Gemini OCR PDF to TXT\OUT")
-    XLSX_OUTPUT_DIR = os.getenv("XLSX_OUTPUT_DIR", r"C:\Users\george.nadrag\01.Cursor_WF\workflow.procesare\App.Simpla\Data-IN-OUT\02. Structurare TXT to XLSX")
-    
-    # Step 3 - PDF Copy
-    EXCEL_PATH = os.getenv("EXCEL_PATH", r"C:\Users\george.nadrag\01.Cursor_WF\workflow.procesare\App.Simpla\Data-IN-OUT\02. Structurare TXT to XLSX\2.structured_extract.xlsx")
-    PDF_COPY_BASE_DIR = os.getenv("PDF_COPY_BASE_DIR", r"C:\Users\george.nadrag\01.Cursor_WF\workflow.procesare\App.Simpla\Data-IN-OUT\03. PDF_Copy doc suport")
-    
-    # Step 4 - Date Validation
-    DATE_VALIDATION_INPUT = os.getenv("DATE_VALIDATION_INPUT", r"C:\Users\george.nadrag\01.Cursor_WF\workflow.procesare\App.Simpla\Data-IN-OUT\02. Structurare TXT to XLSX\2.structured_extract.xlsx")
-    DATE_VALIDATION_OUTPUT = os.getenv("DATE_VALIDATION_OUTPUT", r"C:\Users\george.nadrag\01.Cursor_WF\workflow.procesare\App.Simpla\Data-IN-OUT\04. Date si validare XLSX")
-    
-    # Step 5 - Monthly Expansion
-    MONTHLY_INPUT = os.getenv("MONTHLY_INPUT", r"C:\Users\george.nadrag\01.Cursor_WF\workflow.procesare\App.Simpla\Data-IN-OUT\04. Date si validare XLSX\4.transformed_data.xlsx")
-    MONTHLY_OUTPUT = os.getenv("MONTHLY_OUTPUT", r"C:\Users\george.nadrag\01.Cursor_WF\workflow.procesare\App.Simpla\Data-IN-OUT\05. Monthly Split Logic")
     
     # ===========================================
     # PROCESSING CONFIGURATION
@@ -121,6 +124,24 @@ class Config:
         
         for directory in directories:
             os.makedirs(directory, exist_ok=True)
+    
+    @classmethod
+    def debug_paths(cls):
+        """Debug method to print all calculated paths"""
+        print("=" * 60)
+        print("DYNAMIC PATH CONFIGURATION DEBUG")
+        print("=" * 60)
+        print(f"Current Directory: {cls.CURRENT_DIR}")
+        print(f"Base Path: {cls.BASE_PATH}")
+        print(f"Project Path: {cls.PROJECT_PATH}")
+        print("-" * 40)
+        print(f"PDF Input: {cls.PDF_INPUT_DIR}")
+        print(f"PDF Output: {cls.PDF_OUTPUT_DIR}")
+        print(f"XLSX Output: {cls.XLSX_OUTPUT_DIR}")
+        print(f"PDF Copy Base: {cls.PDF_COPY_BASE_DIR}")
+        print(f"Date Validation Output: {cls.DATE_VALIDATION_OUTPUT}")
+        print(f"Monthly Output: {cls.MONTHLY_OUTPUT}")
+        print("=" * 60)
     
     @classmethod
     def validate_config(cls):
