@@ -1,0 +1,27 @@
+# Workflow Procesare - Python Dependencies
+
+# Core dependencies
+pandas>=2.0.0
+openpyxl>=3.1.0
+
+# Google Generative AI
+google-generativeai>=0.3.0
+
+# PDF processing
+pdf2image>=3.1.0
+Pillow>=10.0.0
+
+# Date processing
+python-dateutil>=2.8.0
+
+# Environment management
+python-dotenv>=1.0.0
+
+# Progress bars
+tqdm>=4.65.0
+
+# Concurrent processing
+concurrent-futures>=3.1.1
+
+# Additional utilities
+regex>=2023.6.3
