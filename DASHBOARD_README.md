@@ -76,6 +76,12 @@ streamlit run app_streamlit.py
 3. Set environment variable: `GEMINI_API_KEY`
 4. Deploy!
 
+**Cloud-Ready Features:**
+- ✅ Handles uploaded files in memory (no local file dependencies)
+- ✅ Temporary file management for PDF processing
+- ✅ Automatic cleanup after processing
+- ✅ Works on both local and cloud environments
+
 ## 📁 File Structure
 ```
 App.Simpla/

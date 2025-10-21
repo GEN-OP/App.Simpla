@@ -267,3 +267,71 @@ Nr. Inreg. la Registrul Comertului: J40/10178/04.12.1996
 Cont: RO33BRDE450SV01035364500, Banca: BRD GSG Suc. MCC
 Pagina 1 din 3
 ```
+
+--- Page 1 ---
+Ultima zi de plata: 21.04.2024
+Numar factura: JAR010112165
+Referinta interna: 0098622176
+Data facturii: 07.04.2024
+Cod abonat: 0879268878
+factura consolidata
+SUCURSALA ALSIM ALARKO SANAYI T
+BD G-RAL VASILE MILEA NR. 2P
+ET.2
+BUCURESTI
+SECTOR 6, 061345
+CIF/CUI: RO40249290
+
+SUCURSALA ALSIM ALARKO SANAYI T
+BD. G-RAL VASILE MILEA NR.2P
+ET.2
+BUCURESTI
+SECTOR 6 061345
+
+Sumar cont
+Sold la data emiterii
+facturii curente (LEI) 0,00
+Factura curenta
++ (LEI) 2.580,71
+Total de plata
+= (LEI) 2.580,71
+
+servicii 0,00
+servicii 2.580,71
+servicii 2.580,71
+Ultima zi de plata: 21.04.2024
+
+Detalii factura curenta
+Perioada
+Valoarea in lei
+fara T.V.A.
+Abonamente
+Abonament lunar date mobile (6) 06.04.24 - 05.05.24 382,98
+Abonament lunar voce (1) 07.03.24 - 05.04.24 46,81
+Abonament lunar voce (1) 12.03.24 - 05.04.24 39,01
+Abonament lunar voce (41) 06.04.24 - 05.05.24 2.046,86
+Total abonamente 2.515,66
+Costuri suplimentare
+Apeluri voce 06.03.24 - 05.04.24
+Apeluri internationale 341,37
+Redirect Nat 10,59
+SMS
+SMS internationale 0,30
+Conferinta in alte retele mob. 119,31
+Plati pe mobil 18,99
+Total costuri suplimentare 490,56
+Reduceri
+Reducere abonament lunar voce -834,52
+Total reduceri -834,52
+Curs de schimb: 5,0659 lei/euro, conform prevederilor din Clauze Contractuale de Baza.
+Total fara TVA (19%) 2.152,71
+TVA (19%) 409,01
+Total sume neincluse în baza de impozitare TVA 18,99
+Total factura 2.580,71
+
+Orange Romania S.A., Bd. Lascar Catargiu nr. 47-53, Sector 1, Bucuresti
+CIF: RO9010105, Capital social subscris si varsat: 58.310.880,3 lei
+Nr. Inreg. la Registrul Comertului: J40/10178/04.12.1996
+Cont: RO33BRDE450SV01035364500, Banca: BRD GSG Suc. MCC
+
+Pagina 1 din 3

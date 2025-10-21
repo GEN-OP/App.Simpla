@@ -17,6 +17,7 @@ import sys
 import pandas as pd
 import tempfile
 import shutil
+import re
 from pathlib import Path
 import time
 from datetime import datetime
@@ -30,6 +31,16 @@ from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
+
+# Initialize session state for error logging and status tracking
+if 'error_log' not in st.session_state:
+    st.session_state.error_log = []
+if 'last_processing_status' not in st.session_state:
+    st.session_state.last_processing_status = "Ready"
+if 'processing_start_time' not in st.session_state:
+    st.session_state.processing_start_time = None
+if 'processing_end_time' not in st.session_state:
+    st.session_state.processing_end_time = None
 
 # Page configuration
 st.set_page_config(
@@ -48,27 +59,187 @@ st.markdown("""
         color: #1f77b4;
         text-align: center;
         margin-bottom: 2rem;
+        background: linear-gradient(90deg, #1f77b4, #ff6b6b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
     .status-success {
         color: #28a745;
         font-weight: bold;
+        background-color: #d4edda;
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        border-left: 4px solid #28a745;
     }
     .status-error {
         color: #dc3545;
         font-weight: bold;
+        background-color: #f8d7da;
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        border-left: 4px solid #dc3545;
     }
     .status-warning {
-        color: #ffc107;
+        color: #856404;
         font-weight: bold;
+        background-color: #fff3cd;
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        border-left: 4px solid #ffc107;
+    }
+    .status-info {
+        color: #0c5460;
+        font-weight: bold;
+        background-color: #d1ecf1;
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        border-left: 4px solid #17a2b8;
     }
     .metric-card {
-        background-color: #f8f9fa;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 1rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        text-align: center;
+        margin: 0.5rem 0;
+    }
+    .metric-value {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    .metric-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    .workflow-step {
+        background: #f8f9fa;
         padding: 1rem;
         border-radius: 0.5rem;
-        border-left: 4px solid #1f77b4;
+        border-left: 4px solid #007bff;
+        margin: 0.5rem 0;
+    }
+    .step-number {
+        background: #007bff;
+        color: white;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 1rem;
+    }
+    .error-log {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    .success-badge {
+        background: #28a745;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 1rem;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    .error-badge {
+        background: #dc3545;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 1rem;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    .warning-badge {
+        background: #ffc107;
+        color: #212529;
+        padding: 0.25rem 0.5rem;
+        border-radius: 1rem;
+        font-size: 0.8rem;
+        font-weight: bold;
     }
 </style>
 """, unsafe_allow_html=True)
+
+def log_error(error_message, error_type="ERROR"):
+    """Log error to session state"""
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    st.session_state.error_log.append({
+        "timestamp": timestamp,
+        "type": error_type,
+        "message": error_message
+    })
+    # Keep only last 50 errors
+    if len(st.session_state.error_log) > 50:
+        st.session_state.error_log = st.session_state.error_log[-50:]
+
+def log_status(status_message, status_type="INFO"):
+    """Log status message"""
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    st.session_state.error_log.append({
+        "timestamp": timestamp,
+        "type": status_type,
+        "message": status_message
+    })
+    st.session_state.last_processing_status = status_message
+
+def get_system_status():
+    """Get comprehensive system status"""
+    status = {
+        "environment": "Unknown",
+        "api_key": "Unknown",
+        "directories": "Unknown",
+        "poppler": "Unknown",
+        "last_error": None,
+        "processing_time": None
+    }
+    
+    # Check environment
+    env_ok, env_message = check_environment()
+    status["environment"] = "✅ OK" if env_ok else "❌ Error"
+    
+    # Check API key
+    if config.GEMINI_API_KEY and config.GEMINI_API_KEY != "your_gemini_api_key_here":
+        status["api_key"] = "✅ Configured"
+    else:
+        status["api_key"] = "❌ Missing"
+    
+    # Check directories
+    dirs_ok = all(os.path.exists(d) for d in [
+        config.PDF_INPUT_DIR, config.PDF_OUTPUT_DIR, 
+        config.XLSX_OUTPUT_DIR, config.DATE_VALIDATION_OUTPUT
+    ])
+    status["directories"] = "✅ OK" if dirs_ok else "❌ Missing"
+    
+    # Check Poppler
+    try:
+        import subprocess
+        result = subprocess.run(['pdftoppm', '-h'], capture_output=True, text=True)
+        status["poppler"] = "✅ Installed" if result.returncode == 0 else "❌ Missing"
+    except:
+        status["poppler"] = "❌ Missing"
+    
+    # Get last error
+    if st.session_state.error_log:
+        last_error = st.session_state.error_log[-1]
+        if last_error["type"] in ["ERROR", "WARNING"]:
+            status["last_error"] = f"{last_error['timestamp']}: {last_error['message']}"
+    
+    # Calculate processing time
+    if st.session_state.processing_start_time and st.session_state.processing_end_time:
+        duration = st.session_state.processing_end_time - st.session_state.processing_start_time
+        status["processing_time"] = f"{duration.total_seconds():.1f}s"
+    
+    return status
 
 def check_environment():
     """Check if environment is properly configured"""
@@ -92,52 +263,85 @@ def check_environment():
     except Exception as e:
         return False, f"Configuration error: {str(e)}"
 
-def run_pdf_to_txt(pdf_files, progress_bar, status_placeholder):
-    """Run PDF to TXT conversion (Step 1)"""
+def run_pdf_to_txt(uploaded_files, progress_bar, status_placeholder):
+    """Run PDF to TXT conversion (Step 1) - handles uploaded files for cloud deployment"""
     try:
         # Import here to avoid issues if not needed
         from pdf2image import convert_from_path
         import google.generativeai as genai
+        from pathlib import Path
+        import tempfile
         
         # Configure API
         genai.configure(api_key=config.GEMINI_API_KEY)
         
-        total_files = len(pdf_files)
+        # Create temporary directory for uploaded files
+        temp_dir = Path(tempfile.gettempdir()) / "streamlit_pdf_uploads"
+        temp_dir.mkdir(exist_ok=True)
+        
+        total_files = len(uploaded_files)
         processed = 0
         
-        for pdf_file in pdf_files:
-            status_placeholder.info(f"🔄 Processing: {pdf_file}")
+        for uploaded_file in uploaded_files:
+            log_status(f"Processing: {uploaded_file.name}", "INFO")
+            status_placeholder.info(f"🔄 Processing: {uploaded_file.name}")
             
-            # Convert PDF to images
-            pdf_path = os.path.join(config.PDF_INPUT_DIR, pdf_file)
-            images = convert_from_path(pdf_path)
+            # Save uploaded file to temporary directory
+            temp_pdf_path = temp_dir / uploaded_file.name
+            with open(temp_pdf_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
             
-            if not images:
-                status_placeholder.warning(f"⚠️ No images extracted from {pdf_file}")
-                continue
-            
-            # Process each page
-            base_name = os.path.splitext(pdf_file)[0]
-            output_file = os.path.join(config.PDF_OUTPUT_DIR, f"{base_name}_ocr.txt")
-            
-            with open(output_file, "w", encoding="utf-8") as f:
-                for idx, img in enumerate(images):
-                    try:
-                        model = genai.GenerativeModel(config.GEMINI_MODEL)
-                        prompt = f"""
-                        Extract ALL text visible in this invoice image (page {idx + 1}).
-                        Include every line of text exactly as it appears.
-                        Capture all product descriptions, quantities, prices and especially dates and date intervals.
-                        Preserve the table structure as much as possible.
-                        """
-                        response = model.generate_content([prompt, img])
-                        f.write(f"\n\n--- Page {idx + 1} ---\n{response.text}")
-                    except Exception as e:
-                        f.write(f"\n\n--- Page {idx + 1} ---\n[OCR Error: {str(e)}]")
-            
-            processed += 1
-            progress_bar.progress(processed / total_files)
-            status_placeholder.success(f"✅ Completed: {pdf_file}")
+            try:
+                # Convert PDF to images using temporary file
+                images = convert_from_path(str(temp_pdf_path))
+                
+                if not images:
+                    log_error(f"No images extracted from {uploaded_file.name}", "WARNING")
+                    status_placeholder.warning(f"⚠️ No images extracted from {uploaded_file.name}")
+                    continue
+                
+                # Process each page
+                base_name = os.path.splitext(uploaded_file.name)[0]
+                output_file = os.path.join(config.PDF_OUTPUT_DIR, f"{base_name}_ocr.txt")
+                
+                with open(output_file, "w", encoding="utf-8") as f:
+                    for idx, img in enumerate(images):
+                        try:
+                            model = genai.GenerativeModel(config.GEMINI_MODEL)
+                            prompt = f"""
+                            Extract ALL text visible in this invoice image (page {idx + 1}).
+                            Include every line of text exactly as it appears.
+                            Capture all product descriptions, quantities, prices and especially dates and date intervals.
+                            Preserve the table structure as much as possible.
+                            """
+                            response = model.generate_content([prompt, img])
+                            f.write(f"\n\n--- Page {idx + 1} ---\n{response.text}")
+                        except Exception as e:
+                            log_error(f"OCR failed on page {idx + 1} of {uploaded_file.name}: {str(e)}", "ERROR")
+                            f.write(f"\n\n--- Page {idx + 1} ---\n[OCR Error: {str(e)}]")
+                
+                processed += 1
+                progress_bar.progress(processed / total_files)
+                log_status(f"Completed: {uploaded_file.name}", "SUCCESS")
+                status_placeholder.success(f"✅ Completed: {uploaded_file.name}")
+                
+            except Exception as e:
+                log_error(f"Failed to process {uploaded_file.name}: {str(e)}", "ERROR")
+                status_placeholder.error(f"❌ Failed to process {uploaded_file.name}: {str(e)}")
+            finally:
+                # Clean up temporary file
+                try:
+                    os.remove(temp_pdf_path)
+                except Exception as cleanup_error:
+                    log_error(f"Could not delete temporary file: {cleanup_error}", "WARNING")
+                    status_placeholder.warning(f"⚠️ Could not delete temporary file: {cleanup_error}")
+        
+        # Clean up temporary directory if empty
+        try:
+            if temp_dir.exists() and not any(temp_dir.iterdir()):
+                temp_dir.rmdir()
+        except Exception:
+            pass  # Ignore cleanup errors for temp directory
         
         return True, f"Successfully processed {processed}/{total_files} PDF files"
         
@@ -344,19 +548,45 @@ def main():
     with st.sidebar:
         st.header("📊 Dashboard")
         
-        # File counts
+        # System status
+        status = get_system_status()
+        st.markdown("### 🔧 System Status")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown(f"**Environment:** {status['environment']}")
+            st.markdown(f"**API Key:** {status['api_key']}")
+        with col2:
+            st.markdown(f"**Directories:** {status['directories']}")
+            st.markdown(f"**Poppler:** {status['poppler']}")
+        
+        if status['last_error']:
+            st.markdown(f"**Last Error:** {status['last_error']}")
+        
+        if status['processing_time']:
+            st.markdown(f"**Last Processing:** {status['processing_time']}")
+        
+        st.divider()
+        
+        # File counts with better styling
+        st.markdown("### 📁 File Counts")
         counts = get_file_counts()
         for name, count in counts.items():
-            st.metric(name, count)
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-value">{count}</div>
+                <div class="metric-label">{name}</div>
+            </div>
+            """, unsafe_allow_html=True)
         
         st.divider()
         
         # Quick actions
         st.header("⚡ Quick Actions")
-        if st.button("🔄 Refresh Counts"):
+        if st.button("🔄 Refresh Status", use_container_width=True):
             st.rerun()
         
-        if st.button("🗑️ Clear All Data"):
+        if st.button("🗑️ Clear All Data", use_container_width=True):
             if st.session_state.get('confirm_clear', False):
                 # Clear all directories
                 for path in [config.PDF_INPUT_DIR, config.PDF_OUTPUT_DIR, 
@@ -364,12 +594,18 @@ def main():
                     if os.path.exists(path):
                         for file in os.listdir(path):
                             os.remove(os.path.join(path, file))
+                log_status("All data cleared", "SUCCESS")
                 st.success("All data cleared!")
                 st.session_state.confirm_clear = False
                 st.rerun()
             else:
                 st.session_state.confirm_clear = True
                 st.warning("Click again to confirm clearing all data")
+        
+        if st.button("📋 Clear Error Log", use_container_width=True):
+            st.session_state.error_log = []
+            st.success("Error log cleared!")
+            st.rerun()
     
     # Main content tabs
     tab1, tab2, tab3, tab4 = st.tabs(["🏠 Home", "📄 Run OCR", "📊 Results", "⚙️ Settings"])
@@ -377,40 +613,89 @@ def main():
     with tab1:
         st.header("Welcome to AI PDF Invoice Processor")
         
+        # Workflow visualization
+        st.markdown("### 🔄 Processing Workflow")
+        
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.markdown("""
+            <div class="workflow-step">
+                <span class="step-number">1</span>
+                <strong>Upload PDFs</strong><br>
+                Drag & drop invoice files
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col2:
+            st.markdown("""
+            <div class="workflow-step">
+                <span class="step-number">2</span>
+                <strong>OCR Processing</strong><br>
+                Extract text with AI
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col3:
+            st.markdown("""
+            <div class="workflow-step">
+                <span class="step-number">3</span>
+                <strong>Data Structure</strong><br>
+                Convert to Excel format
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col4:
+            st.markdown("""
+            <div class="workflow-step">
+                <span class="step-number">4</span>
+                <strong>Date Validation</strong><br>
+                Extract service periods
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.divider()
+        
         col1, col2 = st.columns(2)
         
         with col1:
             st.markdown("""
-            ### 🎯 What This Does
-            - **Upload PDF invoices** and process them automatically
-            - **Extract text** using Google Gemini AI OCR
-            - **Structure data** into organized Excel spreadsheets
-            - **Validate dates** and extract service periods
-            - **Generate reports** for accounting and analysis
-            
-            ### 🚀 Quick Start
-            1. Go to **"Run OCR"** tab
-            2. Upload your PDF invoices
-            3. Click **"Process All"** to run the full workflow
-            4. View results in **"Results"** tab
+            ### 🎯 Key Features
+            - **🤖 AI-Powered OCR** - High accuracy text extraction
+            - **📊 Smart Data Structure** - Organized Excel output
+            - **📅 Date Intelligence** - Service period extraction
+            - **☁️ Cloud Ready** - Works locally and on Streamlit Cloud
+            - **🔄 Real-time Processing** - Live progress tracking
+            - **📋 Error Logging** - Comprehensive status monitoring
             """)
         
         with col2:
-            # Status overview
+            # Current processing status
             st.markdown("### 📈 Current Status")
             
+            # Last processing status
+            status_badge = "success-badge" if "Completed" in st.session_state.last_processing_status else "warning-badge"
+            st.markdown(f"""
+            <div class="{status_badge}">
+                {st.session_state.last_processing_status}
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Quick stats
             col2a, col2b = st.columns(2)
             with col2a:
-                st.metric("PDF Files", counts['PDF Input'])
-                st.metric("Text Files", counts['OCR Text'])
+                st.metric("📄 PDF Files", counts['PDF Input'])
+                st.metric("📝 Text Files", counts['OCR Text'])
             with col2b:
-                st.metric("Excel Files", counts['Structured Excel'])
-                st.metric("Validated Files", counts['Date Validated'])
+                st.metric("📊 Excel Files", counts['Structured Excel'])
+                st.metric("✅ Validated", counts['Date Validated'])
             
-            # Environment status
-            st.markdown("### ✅ Environment")
-            st.success("API Key: Configured")
-            st.success("Directories: Ready")
+            # System health
+            st.markdown("### 🔧 System Health")
+            if status['environment'] == "✅ OK" and status['api_key'] == "✅ Configured":
+                st.success("🟢 All systems operational")
+            else:
+                st.error("🔴 System issues detected - check Settings tab")
     
     with tab2:
         st.header("📄 Process PDF Invoices")
@@ -448,14 +733,17 @@ def main():
             
             with col2:
                 if st.button("🔄 Process All", type="secondary"):
+                    # Start timing
+                    st.session_state.processing_start_time = datetime.now()
+                    log_status("Starting full workflow processing", "INFO")
+                    
                     # Run the full workflow
                     progress_bar = st.progress(0)
                     status_placeholder = st.empty()
                     
                     # Step 1: PDF to TXT
                     status_placeholder.info("🔄 Step 1: Converting PDFs to text...")
-                    pdf_files = [f.name for f in uploaded_files]
-                    success1, message1 = run_pdf_to_txt(pdf_files, progress_bar, status_placeholder)
+                    success1, message1 = run_pdf_to_txt(uploaded_files, progress_bar, status_placeholder)
                     
                     if success1:
                         # Step 2: TXT to XLSX
@@ -471,13 +759,21 @@ def main():
                             
                             if success3:
                                 progress_bar.progress(1.0)
+                                st.session_state.processing_end_time = datetime.now()
+                                log_status("All processing completed successfully", "SUCCESS")
                                 status_placeholder.success("🎉 All processing completed successfully!")
                                 st.balloons()
                             else:
+                                st.session_state.processing_end_time = datetime.now()
+                                log_error(f"Step 3 failed: {message3}", "ERROR")
                                 status_placeholder.error(f"❌ Step 3 failed: {message3}")
                         else:
+                            st.session_state.processing_end_time = datetime.now()
+                            log_error(f"Step 2 failed: {message2}", "ERROR")
                             status_placeholder.error(f"❌ Step 2 failed: {message2}")
                     else:
+                        st.session_state.processing_end_time = datetime.now()
+                        log_error(f"Step 1 failed: {message1}", "ERROR")
                         status_placeholder.error(f"❌ Step 1 failed: {message1}")
     
     with tab3:
@@ -515,48 +811,185 @@ def main():
             st.info("No Excel files found. Process some PDFs first!")
     
     with tab4:
-        st.header("⚙️ Settings & Configuration")
+        st.header("⚙️ Settings & System Monitor")
+        
+        # System Status Overview
+        status = get_system_status()
+        
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-value">{status['environment']}</div>
+                <div class="metric-label">Environment</div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col2:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-value">{status['api_key']}</div>
+                <div class="metric-label">API Key</div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col3:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-value">{status['poppler']}</div>
+                <div class="metric-label">Poppler</div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col4:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-value">{status['directories']}</div>
+                <div class="metric-label">Directories</div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.divider()
+        
+        # Error Log and Status
+        col1, col2 = st.columns([2, 1])
+        
+        with col1:
+            st.subheader("📋 Error Log & Status")
+            
+            if st.session_state.error_log:
+                # Filter options
+                filter_type = st.selectbox("Filter by type:", ["All", "ERROR", "WARNING", "INFO", "SUCCESS"])
+                
+                # Display filtered logs
+                filtered_logs = st.session_state.error_log
+                if filter_type != "All":
+                    filtered_logs = [log for log in st.session_state.error_log if log["type"] == filter_type]
+                
+                # Show logs in a scrollable container
+                log_content = ""
+                for log in reversed(filtered_logs[-20:]):  # Show last 20 entries
+                    badge_class = f"{log['type'].lower()}-badge" if log['type'] in ["ERROR", "WARNING", "SUCCESS"] else "info-badge"
+                    log_content += f"""
+                    <div style="margin: 0.5rem 0; padding: 0.5rem; border-left: 3px solid {'#dc3545' if log['type'] == 'ERROR' else '#ffc107' if log['type'] == 'WARNING' else '#28a745' if log['type'] == 'SUCCESS' else '#17a2b8'}; background: #f8f9fa;">
+                        <span class="{badge_class}">{log['type']}</span>
+                        <span style="color: #6c757d; font-size: 0.8rem;">{log['timestamp']}</span><br>
+                        <span style="font-family: monospace;">{log['message']}</span>
+                    </div>
+                    """
+                
+                st.markdown(f"""
+                <div class="error-log">
+                    {log_content if log_content else "No logs to display"}
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.info("No error logs yet. Start processing some PDFs to see activity here.")
+        
+        with col2:
+            st.subheader("🔧 Configuration")
+            
+            # Current settings
+            st.markdown("**API Settings:**")
+            st.code(f"""
+Model: {config.GEMINI_MODEL}
+Batch Size: {config.API_BATCH_SIZE}
+Delay: {config.API_DELAY_SECONDS}s
+Max Retries: {config.API_MAX_RETRIES}
+Debug: {config.DEBUG_MODE}
+            """)
+            
+            st.markdown("**Processing Settings:**")
+            st.code(f"""
+Max Workers: {config.MAX_WORKERS}
+Date Format: {config.DATE_FORMAT}
+VAT Tolerance: {config.VAT_TOLERANCE}
+            """)
+            
+            # Quick actions
+            st.markdown("**Quick Actions:**")
+            if st.button("🔄 Refresh Status", use_container_width=True):
+                st.rerun()
+            
+            if st.button("📋 Clear Logs", use_container_width=True):
+                st.session_state.error_log = []
+                st.success("Logs cleared!")
+                st.rerun()
+            
+            if st.button("🔍 Test Poppler", use_container_width=True):
+                try:
+                    import subprocess
+                    result = subprocess.run(['pdftoppm', '-v'], capture_output=True, text=True)
+                    if result.returncode == 0:
+                        st.success("✅ Poppler working!")
+                    else:
+                        st.error("❌ Poppler not working")
+                except:
+                    st.error("❌ Poppler not found")
+        
+        st.divider()
+        
+        # Directory Status
+        st.subheader("📁 Directory Status")
+        
+        directories = {
+            "PDF Input": config.PDF_INPUT_DIR,
+            "PDF Output": config.PDF_OUTPUT_DIR,
+            "Excel Output": config.XLSX_OUTPUT_DIR,
+            "Date Validation": config.DATE_VALIDATION_OUTPUT
+        }
+        
+        for name, path in directories.items():
+            exists = os.path.exists(path)
+            file_count = len(os.listdir(path)) if exists else 0
+            
+            col1, col2, col3 = st.columns([2, 1, 1])
+            with col1:
+                st.text(f"{name}: {path}")
+            with col2:
+                status_icon = "✅" if exists else "❌"
+                st.text(f"{status_icon} {file_count} files")
+            with col3:
+                if exists:
+                    st.success("OK")
+                else:
+                    st.error("Missing")
+        
+        st.divider()
+        
+        # Deployment Info
+        st.subheader("🚀 Deployment Information")
         
         col1, col2 = st.columns(2)
         
         with col1:
-            st.subheader("🔧 Current Configuration")
-            st.json({
-                "API Model": config.GEMINI_MODEL,
-                "Batch Size": config.API_BATCH_SIZE,
-                "API Delay": f"{config.API_DELAY_SECONDS}s",
-                "Max Retries": config.API_MAX_RETRIES,
-                "Debug Mode": config.DEBUG_MODE
-            })
+            st.markdown("""
+            **Local Development:**
+            ```bash
+            streamlit run app_streamlit.py
+            ```
+            
+            **Requirements:**
+            - Python 3.8+
+            - All dependencies installed
+            - Valid Gemini API key
+            - Poppler installed
+            """)
         
         with col2:
-            st.subheader("📁 Directory Paths")
-            st.json({
-                "PDF Input": config.PDF_INPUT_DIR,
-                "PDF Output": config.PDF_OUTPUT_DIR,
-                "Excel Output": config.XLSX_OUTPUT_DIR,
-                "Date Validation": config.DATE_VALIDATION_OUTPUT
-            })
-        
-        st.subheader("🚀 Deployment Instructions")
-        st.markdown("""
-        ### Local Development
-        ```bash
-        streamlit run app_streamlit.py
-        ```
-        
-        ### Streamlit Cloud Deployment
-        1. Push your code to GitHub
-        2. Connect your GitHub repo to Streamlit Cloud
-        3. Set environment variables in Streamlit Cloud:
-           - `GEMINI_API_KEY`: Your Google Gemini API key
-        4. Deploy!
-        
-        ### Requirements
-        - Python 3.8+
-        - All dependencies in `requirements.txt`
-        - Valid Gemini API key in `.env` file
-        """)
+            st.markdown("""
+            **Streamlit Cloud:**
+            1. Push code to GitHub
+            2. Connect to Streamlit Cloud
+            3. Set `GEMINI_API_KEY` environment variable
+            4. Deploy!
+            
+            **Cloud Features:**
+            - ✅ Handles uploaded files in memory
+            - ✅ Temporary file management
+            - ✅ Automatic cleanup
+            """)
 
 if __name__ == "__main__":
     main()
