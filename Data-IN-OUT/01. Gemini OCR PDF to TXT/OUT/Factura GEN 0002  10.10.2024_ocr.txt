@@ -4,7 +4,6 @@ Factura
 GEN 0002
 Data Emitere 10.10.2024
 Data Scadenta 09.11.2024
-
 Furnizor
 GEN OPERATIONS S.R.L.
 CUI: 50603245
@@ -24,7 +23,6 @@ Str: MUNICIPIUL BUCURESTI, SECTOR 3, ALEEA
 POSTAVARULUI, NR.6, BL.D2, SC.1, ET.10, AP.209
 Banca:
 IBAN:
-
 # Articol UM Cantitate Pret Valoare Total
 1 Intocmire lista cantitati - Pasaj superior peste CF Port Constanța
 ORE 10 150 1500 1500
@@ -35,7 +33,6 @@ Banca: BANCA TRANSILVANIA
 
 Total fara TVA: 1500
 Total: 1500 Lei
-
 Factura circula fara semnatura si stampila cf. art.V, alin (2) din Ordonanta nr.17/2015 si art. 319 alin (29) din
 Legea nr. 227/2015 privind Codul fiscal.
 GEN 0002 1500 Lei scadenta la 09.11.2024

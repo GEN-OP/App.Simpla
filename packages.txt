@@ -1,3 +1,0 @@
-# System packages for Streamlit Cloud
-# PyMuPDF has all dependencies included, no system packages needed
-
