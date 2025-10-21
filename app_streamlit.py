@@ -1,9 +1,9 @@
 """
-AI-Powered PDF Invoice Processor - Streamlit Dashboard
-=====================================================
+AI-Powered PDF Invoice Processor - Enhanced Streamlit Dashboard
+==============================================================
 
-A clean, professional dashboard for processing PDF invoices using AI.
-Integrates existing workflow scripts: 1.PDF_to_Txt.py → 2.Txt_to_XLSX.py → 4.XLSX_validation_dates.py
+A modern, professional dashboard for processing PDF invoices using AI.
+Integrates existing workflow scripts with dedicated tabs for each processing step.
 
 Deployment Instructions:
 - Local: streamlit run app_streamlit.py
@@ -50,122 +50,473 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for better styling
+# Enhanced Custom CSS for modern design
 st.markdown("""
 <style>
+    /* Import Google Fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    /* Global Styles */
+    .main {
+        font-family: 'Inter', sans-serif;
+    }
+    
+    /* Header Styles */
     .main-header {
-        font-size: 2.5rem;
-        font-weight: bold;
-        color: #1f77b4;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        padding: 1.25rem;
+        border-radius: 15px;
+        color: white;
         text-align: center;
-        margin-bottom: 2rem;
-        background: linear-gradient(90deg, #1f77b4, #ff6b6b);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 6px 25px rgba(102, 126, 234, 0.25);
+        position: relative;
+        overflow: hidden;
     }
-    .status-success {
-        color: #28a745;
-        font-weight: bold;
-        background-color: #d4edda;
-        padding: 0.5rem;
-        border-radius: 0.25rem;
-        border-left: 4px solid #28a745;
+    
+    .main-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(255,255,255,0.1) 100%);
+        animation: shimmer 3s infinite;
     }
-    .status-error {
-        color: #dc3545;
-        font-weight: bold;
-        background-color: #f8d7da;
-        padding: 0.5rem;
-        border-radius: 0.25rem;
-        border-left: 4px solid #dc3545;
+    
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
     }
-    .status-warning {
-        color: #856404;
-        font-weight: bold;
-        background-color: #fff3cd;
-        padding: 0.5rem;
-        border-radius: 0.25rem;
-        border-left: 4px solid #ffc107;
+    
+    .main-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        position: relative;
+        z-index: 1;
     }
-    .status-info {
-        color: #0c5460;
-        font-weight: bold;
-        background-color: #d1ecf1;
-        padding: 0.5rem;
-        border-radius: 0.25rem;
-        border-left: 4px solid #17a2b8;
+    
+    .main-header p {
+        font-size: 0.95rem;
+        margin: 0.5rem 0 0 0;
+        opacity: 0.9;
+        position: relative;
+        z-index: 1;
     }
+    
+    /* Metric Cards */
     .metric-card {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1rem;
+        border-radius: 15px;
         color: white;
-        padding: 1.5rem;
-        border-radius: 1rem;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         text-align: center;
         margin: 0.5rem 0;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
     }
+    
+    .metric-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+    
+    .metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .metric-card:hover::before {
+        left: 100%;
+    }
+    
     .metric-value {
-        font-size: 2rem;
-        font-weight: bold;
-        margin-bottom: 0.5rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
+    
     .metric-label {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
         opacity: 0.9;
+        margin: 0.3rem 0 0 0;
+        font-weight: 500;
     }
-    .workflow-step {
-        background: #f8f9fa;
+    
+    /* Status Styles */
+    .status-success {
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        color: #155724;
         padding: 1rem;
-        border-radius: 0.5rem;
-        border-left: 4px solid #007bff;
+        border-radius: 15px;
+        border-left: 5px solid #28a745;
         margin: 0.5rem 0;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+        font-weight: 500;
     }
+    
+    .status-error {
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        color: #721c24;
+        padding: 1rem;
+        border-radius: 15px;
+        border-left: 5px solid #dc3545;
+        margin: 0.5rem 0;
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.2);
+        font-weight: 500;
+    }
+    
+    .status-warning {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        color: #856404;
+        padding: 1rem;
+        border-radius: 15px;
+        border-left: 5px solid #ffc107;
+        margin: 0.5rem 0;
+        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
+        font-weight: 500;
+    }
+    
+    .status-info {
+        background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+        color: #0c5460;
+        padding: 1rem;
+        border-radius: 15px;
+        border-left: 5px solid #17a2b8;
+        margin: 0.5rem 0;
+        box-shadow: 0 4px 15px rgba(23, 162, 184, 0.2);
+        font-weight: 500;
+    }
+    
+    /* Workflow Steps */
+    .workflow-step {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 1.25rem;
+        border-radius: 15px;
+        margin: 0.75rem 0;
+        border-left: 4px solid #667eea;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .workflow-step:hover {
+        transform: translateX(5px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.15);
+    }
+    
+    .workflow-step-number {
+        position: absolute;
+        top: -10px;
+        left: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+        box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+    }
+    
+    .workflow-step h3 {
+        margin: 0.5rem 0 0.5rem 0;
+        color: #2c3e50;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+    
+    .workflow-step p {
+        margin: 0;
+        color: #495057;
+        font-size: 0.85rem;
+        line-height: 1.5;
+    }
+    
+    /* Tab Styling */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 12px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 12px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        background: white;
+        border-radius: 12px;
+        padding: 15px 30px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        border: 2px solid transparent;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        border: 2px solid rgba(255,255,255,0.2);
+        transform: translateY(-2px);
+    }
+    
+    .stTabs [data-baseweb="tab"]:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    /* Error Log */
+    .error-log {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 1px solid #dee2e6;
+        border-radius: 15px;
+        padding: 1.5rem;
+        max-height: 500px;
+        overflow-y: auto;
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        box-shadow: inset 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .error-entry {
+        margin: 1rem 0;
+        padding: 1.2rem;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        border-left: 5px solid;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .error-entry:hover {
+        transform: translateX(8px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+    
+    .error-entry.ERROR {
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        color: #721c24;
+        border-left-color: #dc3545;
+    }
+    
+    .error-entry.WARNING {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        color: #856404;
+        border-left-color: #ffc107;
+    }
+    
+    .error-entry.INFO {
+        background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+        color: #0c5460;
+        border-left-color: #17a2b8;
+    }
+    
+    .error-entry.SUCCESS {
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        color: #155724;
+        border-left-color: #28a745;
+    }
+    
+    /* Progress Bar */
+    .stProgress > div > div > div > div {
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        border-radius: 10px;
+    }
+    
+    /* File Uploader */
+    .stFileUploader > div {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 15px;
+        padding: 2rem;
+        border: 3px dashed #007bff;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+    
+    .stFileUploader > div:hover {
+        border-color: #0056b3;
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        transform: scale(1.02);
+    }
+    
+    /* Buttons */
+    .stButton > button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+    
+    /* Sidebar */
+    .css-1d391kg {
+        background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    /* Custom Scrollbar */
+    .error-log::-webkit-scrollbar {
+        width: 10px;
+    }
+    
+    .error-log::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 5px;
+    }
+    
+    .error-log::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 5px;
+    }
+    
+    .error-log::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    }
+    
+    /* Feature Cards */
+    .feature-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 1.25rem;
+        border-radius: 15px;
+        margin: 0.75rem 0;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border: 2px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        border-color: #667eea;
+    }
+    
+    .feature-icon {
+        font-size: 2rem;
+        margin-bottom: 0.75rem;
+        display: block;
+    }
+    
+    .feature-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.4rem;
+    }
+    
+    .feature-description {
+        color: #495057;
+        line-height: 1.5;
+        font-size: 0.85rem;
+    }
+    
+    /* Step Cards */
+    .step-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 1.5rem;
+        border-radius: 15px;
+        margin: 1rem 0;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border: 2px solid #dee2e6;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .step-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        border-color: #667eea;
+    }
+    
+    .step-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    }
+    
     .step-number {
-        background: #007bff;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         border-radius: 50%;
-        width: 30px;
-        height: 30px;
+        width: 40px;
+        height: 40px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-weight: bold;
-        margin-right: 1rem;
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: 0.75rem;
+        box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
     }
-    .error-log {
-        background: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-radius: 0.5rem;
-        padding: 1rem;
-        font-family: 'Courier New', monospace;
+    
+    .step-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+    
+    .step-description {
+        color: #495057;
+        line-height: 1.5;
+        margin-bottom: 0;
         font-size: 0.9rem;
-        max-height: 300px;
-        overflow-y: auto;
     }
-    .success-badge {
-        background: #28a745;
-        color: white;
-        padding: 0.25rem 0.5rem;
-        border-radius: 1rem;
-        font-size: 0.8rem;
-        font-weight: bold;
+    
+    .step-status {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: inline-block;
     }
-    .error-badge {
-        background: #dc3545;
-        color: white;
-        padding: 0.25rem 0.5rem;
-        border-radius: 1rem;
-        font-size: 0.8rem;
-        font-weight: bold;
+    
+    .step-status.ready {
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        color: #155724;
     }
-    .warning-badge {
-        background: #ffc107;
-        color: #212529;
-        padding: 0.25rem 0.5rem;
-        border-radius: 1rem;
-        font-size: 0.8rem;
-        font-weight: bold;
+    
+    .step-status.processing {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        color: #856404;
+    }
+    
+    .step-status.completed {
+        background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+        color: #0c5460;
+    }
+    
+    .step-status.error {
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        color: #721c24;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -247,32 +598,30 @@ def check_environment():
         # Check API key
         api_key = config.GEMINI_API_KEY
         if not api_key or api_key == "your_gemini_api_key_here":
-            return False, "GEMINI_API_KEY not configured in .env file"
+            return False, "GEMINI_API_KEY not configured"
         
-        # Check if directories exist
-        if not os.path.exists(config.PDF_INPUT_DIR):
-            os.makedirs(config.PDF_INPUT_DIR, exist_ok=True)
-        if not os.path.exists(config.PDF_OUTPUT_DIR):
-            os.makedirs(config.PDF_OUTPUT_DIR, exist_ok=True)
-        if not os.path.exists(config.XLSX_OUTPUT_DIR):
-            os.makedirs(config.XLSX_OUTPUT_DIR, exist_ok=True)
-        if not os.path.exists(config.DATE_VALIDATION_OUTPUT):
-            os.makedirs(config.DATE_VALIDATION_OUTPUT, exist_ok=True)
+        # Check directories
+        required_dirs = [
+            config.PDF_INPUT_DIR, config.PDF_OUTPUT_DIR,
+            config.XLSX_OUTPUT_DIR, config.DATE_VALIDATION_OUTPUT
+        ]
         
-        return True, "Environment configured correctly"
+        for dir_path in required_dirs:
+            if not os.path.exists(dir_path):
+                return False, f"Directory missing: {dir_path}"
+        
+        return True, "Environment OK"
     except Exception as e:
-        return False, f"Configuration error: {str(e)}"
+        return False, f"Environment check failed: {str(e)}"
 
 def run_pdf_to_txt(uploaded_files, progress_bar, status_placeholder):
-    """Run PDF to TXT conversion (Step 1) - handles uploaded files for cloud deployment"""
+    """Run PDF to TXT conversion with uploaded files"""
     try:
-        # Import here to avoid issues if not needed
         from pdf2image import convert_from_path
         import google.generativeai as genai
         from pathlib import Path
         import tempfile
         
-        # Configure API
         genai.configure(api_key=config.GEMINI_API_KEY)
         
         # Create temporary directory for uploaded files
@@ -286,48 +635,50 @@ def run_pdf_to_txt(uploaded_files, progress_bar, status_placeholder):
             log_status(f"Processing: {uploaded_file.name}", "INFO")
             status_placeholder.info(f"🔄 Processing: {uploaded_file.name}")
             
-            # Save uploaded file to temporary directory
+            # Save uploaded file to temporary location
             temp_pdf_path = temp_dir / uploaded_file.name
             with open(temp_pdf_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
             
             try:
-                # Convert PDF to images using temporary file
+                # Convert PDF to images
                 images = convert_from_path(str(temp_pdf_path))
                 
-                if not images:
-                    log_error(f"No images extracted from {uploaded_file.name}", "WARNING")
-                    status_placeholder.warning(f"⚠️ No images extracted from {uploaded_file.name}")
-                    continue
+                # Process each page with Gemini
+                full_text = ""
+                for i, image in enumerate(images):
+                    log_status(f"Processing page {i+1}/{len(images)} of {uploaded_file.name}", "INFO")
+                    
+                    # Convert image to bytes
+                    import io
+                    img_byte_arr = io.BytesIO()
+                    image.save(img_byte_arr, format='PNG')
+                    img_byte_arr = img_byte_arr.getvalue()
+                    
+                    # Use Gemini to extract text
+                    model = genai.GenerativeModel(config.GEMINI_MODEL)
+                    response = model.generate_content([
+                        "Extract all text from this invoice image. Include all numbers, dates, amounts, and text. Be precise and complete.",
+                        {
+                            "mime_type": "image/png",
+                            "data": img_byte_arr
+                        }
+                    ])
+                    
+                    if response.text:
+                        full_text += f"\n--- Page {i+1} ---\n{response.text}\n"
                 
-                # Process each page
+                # Save extracted text
                 base_name = os.path.splitext(uploaded_file.name)[0]
                 output_file = os.path.join(config.PDF_OUTPUT_DIR, f"{base_name}_ocr.txt")
                 
-                with open(output_file, "w", encoding="utf-8") as f:
-                    for idx, img in enumerate(images):
-                        try:
-                            model = genai.GenerativeModel(config.GEMINI_MODEL)
-                            prompt = f"""
-                            Extract ALL text visible in this invoice image (page {idx + 1}).
-                            Include every line of text exactly as it appears.
-                            Capture all product descriptions, quantities, prices and especially dates and date intervals.
-                            Preserve the table structure as much as possible.
-                            """
-                            response = model.generate_content([prompt, img])
-                            f.write(f"\n\n--- Page {idx + 1} ---\n{response.text}")
-                        except Exception as e:
-                            log_error(f"OCR failed on page {idx + 1} of {uploaded_file.name}: {str(e)}", "ERROR")
-                            f.write(f"\n\n--- Page {idx + 1} ---\n[OCR Error: {str(e)}]")
+                with open(output_file, 'w', encoding='utf-8') as f:
+                    f.write(full_text)
                 
                 processed += 1
-                progress_bar.progress(processed / total_files)
-                log_status(f"Completed: {uploaded_file.name}", "SUCCESS")
+                log_status(f"Successfully processed: {uploaded_file.name}", "SUCCESS")
                 status_placeholder.success(f"✅ Completed: {uploaded_file.name}")
                 
-            except Exception as e:
-                log_error(f"Failed to process {uploaded_file.name}: {str(e)}", "ERROR")
-                status_placeholder.error(f"❌ Failed to process {uploaded_file.name}: {str(e)}")
             finally:
                 # Clean up temporary file
                 try:
@@ -336,484 +687,480 @@ def run_pdf_to_txt(uploaded_files, progress_bar, status_placeholder):
                     log_error(f"Could not delete temporary file: {cleanup_error}", "WARNING")
                     status_placeholder.warning(f"⚠️ Could not delete temporary file: {cleanup_error}")
         
-        # Clean up temporary directory if empty
+        # Clean up temporary directory
         try:
             if temp_dir.exists() and not any(temp_dir.iterdir()):
                 temp_dir.rmdir()
         except Exception:
-            pass  # Ignore cleanup errors for temp directory
+            pass
         
         return True, f"Successfully processed {processed}/{total_files} PDF files"
         
     except Exception as e:
+        log_error(f"PDF to TXT conversion failed: {str(e)}", "ERROR")
         return False, f"PDF to TXT conversion failed: {str(e)}"
 
-def run_txt_to_xlsx(progress_bar, status_placeholder):
-    """Run TXT to XLSX conversion (Step 2)"""
+def run_txt_to_xlsx():
+    """Run TXT to XLSX conversion"""
     try:
-        # Import here to avoid issues if not needed
-        import google.generativeai as genai
-        import json
-        import re
+        import subprocess
+        result = subprocess.run([sys.executable, "2.Txt_to_XLSX.py"], 
+                              capture_output=True, text=True, cwd=os.getcwd())
         
-        # Configure API
-        genai.configure(api_key=config.GEMINI_API_KEY)
-        
-        status_placeholder.info("🔄 Converting text files to structured Excel...")
-        
-        # Get all text files
-        txt_files = [f for f in os.listdir(config.PDF_OUTPUT_DIR) if f.endswith('_ocr.txt')]
-        
-        if not txt_files:
-            return False, "No OCR text files found"
-        
-        # Process each text file
-        all_invoices = []
-        processed = 0
-        
-        for txt_file in txt_files:
-            txt_path = os.path.join(config.PDF_OUTPUT_DIR, txt_file)
-            
-            with open(txt_path, 'r', encoding='utf-8') as f:
-                text_content = f.read()
-            
-            # Extract invoice details using Gemini
-            model = genai.GenerativeModel(config.GEMINI_MODEL)
-            prompt = f"""
-            Extract the following invoice details from the text below. Return ONLY a valid JSON object.
-            For each field, include a confidence score from 1-10 where 10 means you're absolutely certain and 1 means you're very uncertain.
-            
-            {{
-                "invoice_number": "XXX123",
-                "invoice_number_confidence": 9,
-                "invoice_date": "DD/MM/YYYY",
-                "invoice_date_confidence": 8,
-                "vendor_name": "Company Name",
-                "vendor_name_confidence": 10,
-                "items_details": [
-                    "Exact full item description as written on the invoice",
-                    "Ensure multi-word descriptions are fully captured"
-                ],
-                "items_details_confidence": 7,
-                "total_amount": "1234.56",
-                "total_amount_confidence": 9,
-                "total_without_vat": "1100.00",
-                "total_without_vat_confidence": 8,
-                "vat_amount": "134.56",
-                "vat_amount_confidence": 9,
-                "currency": "LEI",
-                "currency_confidence": 10,
-                "payment_due_date": "DD/MM/YYYY",
-                "payment_due_date_confidence": 7,
-                "vendor_address": "Full vendor address",
-                "vendor_address_confidence": 6,
-                "customer_name": "Customer name if visible",
-                "customer_name_confidence": 5,
-                "customer_address": "Customer address if visible",
-                "customer_address_confidence": 4,
-                "notes": "Any additional notes or observations",
-                "notes_confidence": 3
-            }}
-            
-            Text to analyze:
-            {text_content}
-            """
-            
-            try:
-                response = model.generate_content(prompt)
-                invoice_data = json.loads(response.text)
-                invoice_data['source_file'] = txt_file
-                all_invoices.append(invoice_data)
-            except Exception as e:
-                # Create a basic entry if parsing fails
-                all_invoices.append({
-                    'source_file': txt_file,
-                    'invoice_number': 'ERROR',
-                    'invoice_date': '',
-                    'vendor_name': 'ERROR',
-                    'total_amount': '0',
-                    'error': str(e)
-                })
-            
-            processed += 1
-            progress_bar.progress(processed / len(txt_files))
-        
-        # Convert to DataFrame and save
-        df = pd.DataFrame(all_invoices)
-        output_path = os.path.join(config.XLSX_OUTPUT_DIR, "2.structured_extract.xlsx")
-        df.to_excel(output_path, index=False)
-        
-        return True, f"Successfully processed {processed} text files to Excel"
-        
+        if result.returncode == 0:
+            log_status("TXT to XLSX conversion completed successfully", "SUCCESS")
+            return True, "TXT to XLSX conversion completed successfully"
+        else:
+            log_error(f"TXT to XLSX conversion failed: {result.stderr}", "ERROR")
+            return False, f"TXT to XLSX conversion failed: {result.stderr}"
     except Exception as e:
+        log_error(f"TXT to XLSX conversion failed: {str(e)}", "ERROR")
         return False, f"TXT to XLSX conversion failed: {str(e)}"
 
-def run_date_validation(progress_bar, status_placeholder):
-    """Run date validation and extraction (Step 4)"""
+def run_xlsx_validation():
+    """Run XLSX validation and date processing"""
     try:
-        # Import here to avoid issues if not needed
-        import google.generativeai as genai
-        from dateutil.relativedelta import relativedelta
+        import subprocess
+        result = subprocess.run([sys.executable, "4.XLSX_validation_dates.py"], 
+                              capture_output=True, text=True, cwd=os.getcwd())
         
-        # Configure API
-        genai.configure(api_key=config.GEMINI_API_KEY)
-        
-        status_placeholder.info("🔄 Extracting service dates and validating data...")
-        
-        # Read the Excel file
-        input_excel = os.path.join(config.XLSX_OUTPUT_DIR, "2.structured_extract.xlsx")
-        if not os.path.exists(input_excel):
-            return False, "Structured Excel file not found. Run Step 2 first."
-        
-        df = pd.read_excel(input_excel)
-        
-        if df.empty:
-            return False, "No data found in Excel file"
-        
-        # Process each row
-        processed = 0
-        total_rows = len(df)
-        
-        for idx, row in df.iterrows():
-            # Simple date extraction logic (simplified version)
-            if pd.notna(row.get('items_details')):
-                # Extract dates from items details
-                items = str(row['items_details'])
-                # Look for date patterns
-                date_patterns = [
-                    r'(\d{1,2}[./]\d{1,2}[./]\d{2,4})',
-                    r'(\d{1,2}\s+\w+\s+\d{2,4})',
-                ]
-                
-                dates_found = []
-                for pattern in date_patterns:
-                    matches = re.findall(pattern, items)
-                    dates_found.extend(matches)
-                
-                # Add extracted dates to the row
-                df.at[idx, 'extracted_dates'] = ', '.join(dates_found) if dates_found else 'No dates found'
-            else:
-                df.at[idx, 'extracted_dates'] = 'No items details'
-            
-            processed += 1
-            progress_bar.progress(processed / total_rows)
-        
-        # Save the processed data
-        output_path = os.path.join(config.DATE_VALIDATION_OUTPUT, "4.transformed_data.xlsx")
-        df.to_excel(output_path, index=False)
-        
-        return True, f"Successfully processed {processed} rows with date extraction"
-        
-    except Exception as e:
-        return False, f"Date validation failed: {str(e)}"
-
-def get_file_counts():
-    """Get counts of files in each directory"""
-    counts = {}
-    directories = {
-        'PDF Input': config.PDF_INPUT_DIR,
-        'OCR Text': config.PDF_OUTPUT_DIR,
-        'Structured Excel': config.XLSX_OUTPUT_DIR,
-        'Date Validated': config.DATE_VALIDATION_OUTPUT
-    }
-    
-    for name, path in directories.items():
-        if os.path.exists(path):
-            if name == 'PDF Input':
-                counts[name] = len([f for f in os.listdir(path) if f.endswith('.pdf')])
-            elif name == 'OCR Text':
-                counts[name] = len([f for f in os.listdir(path) if f.endswith('_ocr.txt')])
-            elif name == 'Structured Excel':
-                counts[name] = len([f for f in os.listdir(path) if f.endswith('.xlsx')])
-            elif name == 'Date Validated':
-                counts[name] = len([f for f in os.listdir(path) if f.endswith('.xlsx')])
+        if result.returncode == 0:
+            log_status("XLSX validation completed successfully", "SUCCESS")
+            return True, "XLSX validation completed successfully"
         else:
-            counts[name] = 0
+            log_error(f"XLSX validation failed: {result.stderr}", "ERROR")
+            return False, f"XLSX validation failed: {result.stderr}"
+    except Exception as e:
+        log_error(f"XLSX validation failed: {str(e)}", "ERROR")
+        return False, f"XLSX validation failed: {str(e)}"
+
+def display_results():
+    """Display processing results with enhanced visualization"""
+    st.markdown("## 📊 Processing Results")
     
-    return counts
+    # Check for output files
+    output_files = []
+    
+    # Check XLSX output
+    xlsx_file = os.path.join(config.XLSX_OUTPUT_DIR, "2.structured_extract.xlsx")
+    if os.path.exists(xlsx_file):
+        output_files.append(("📝 Structured Data (Step 2)", xlsx_file, "success"))
+    
+    # Check validation output
+    validation_file = os.path.join(config.DATE_VALIDATION_OUTPUT, "4.transformed_data.xlsx")
+    if os.path.exists(validation_file):
+        output_files.append(("✅ Validated Data (Step 3)", validation_file, "info"))
+    
+    if output_files:
+        for title, file_path, status_type in output_files:
+            # Display title with styling
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                        padding: 1rem; border-radius: 10px; margin: 1rem 0; color: white;">
+                <h3 style="margin: 0; color: white;">{title}</h3>
+                <p style="margin: 0.5rem 0 0 0; opacity: 0.9; font-size: 0.9rem;">
+                    File: {os.path.basename(file_path)} | 
+                    Size: {os.path.getsize(file_path) / 1024:.1f} KB
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            try:
+                df = pd.read_excel(file_path)
+                
+                # Display summary metrics
+                col1, col2, col3, col4 = st.columns(4)
+                with col1:
+                    st.metric("📊 Total Rows", len(df))
+                with col2:
+                    st.metric("📋 Columns", len(df.columns))
+                with col3:
+                    # Count non-empty cells
+                    non_empty = df.notna().sum().sum()
+                    st.metric("✓ Filled Cells", f"{non_empty:,}")
+                with col4:
+                    # Calculate completion percentage
+                    total_cells = len(df) * len(df.columns)
+                    completion = (non_empty / total_cells * 100) if total_cells > 0 else 0
+                    st.metric("📈 Completion", f"{completion:.1f}%")
+                
+                # Display dataframe with better styling
+                st.markdown("#### 📄 Data Preview")
+                st.dataframe(
+                    df, 
+                    use_container_width=True, 
+                    height=400,
+                    hide_index=False
+                )
+                
+                # Download and action buttons
+                col1, col2, col3 = st.columns([2, 2, 3])
+                with col1:
+                    with open(file_path, "rb") as f:
+                        st.download_button(
+                            label=f"📥 Download {title.split('(')[0].strip()}",
+                            data=f.read(),
+                            file_name=os.path.basename(file_path),
+                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            use_container_width=True
+                        )
+                
+                with col2:
+                    if st.button(f"🔄 Refresh Data", key=f"refresh_{file_path}", use_container_width=True):
+                        st.rerun()
+                
+                with col3:
+                    st.info(f"📅 Last modified: {datetime.fromtimestamp(os.path.getmtime(file_path)).strftime('%Y-%m-%d %H:%M:%S')}")
+                
+                st.markdown("---")
+                
+            except Exception as e:
+                st.error(f"❌ Error reading {file_path}: {str(e)}")
+                log_error(f"Error reading Excel file: {str(e)}", "ERROR")
+    else:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); 
+                    padding: 2rem; border-radius: 15px; text-align: center; margin: 2rem 0;
+                    border-left: 5px solid #ffc107;">
+            <h3 style="color: #856404; margin: 0 0 1rem 0;">⚠️ No Results Available</h3>
+            <p style="color: #856404; margin: 0; font-size: 1.1rem;">
+                Please run the processing workflow first to generate results.
+            </p>
+            <p style="color: #856404; margin: 1rem 0 0 0; opacity: 0.8;">
+                Go to the workflow tabs above to process your PDF invoices.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
 def main():
     """Main Streamlit application"""
     
     # Header
-    st.markdown('<h1 class="main-header">🤖 AI PDF Invoice Processor</h1>', unsafe_allow_html=True)
-    
-    # Check environment
-    env_ok, env_message = check_environment()
-    if not env_ok:
-        st.error(f"❌ {env_message}")
-        st.stop()
+    st.markdown("""
+    <div class="main-header">
+        <h1>🤖 AI PDF Invoice Processor</h1>
+        <p>Transform PDF invoices into structured data with AI-powered OCR and validation</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Sidebar
     with st.sidebar:
-        st.header("📊 Dashboard")
+        st.markdown("## 🔧 System Status")
         
-        # System status
+        # Get system status
         status = get_system_status()
-        st.markdown("### 🔧 System Status")
         
+        # Display status metrics
         col1, col2 = st.columns(2)
         with col1:
-            st.markdown(f"**Environment:** {status['environment']}")
-            st.markdown(f"**API Key:** {status['api_key']}")
-        with col2:
-            st.markdown(f"**Directories:** {status['directories']}")
-            st.markdown(f"**Poppler:** {status['poppler']}")
-        
-        if status['last_error']:
-            st.markdown(f"**Last Error:** {status['last_error']}")
-        
-        if status['processing_time']:
-            st.markdown(f"**Last Processing:** {status['processing_time']}")
-        
-        st.divider()
-        
-        # File counts with better styling
-        st.markdown("### 📁 File Counts")
-        counts = get_file_counts()
-        for name, count in counts.items():
             st.markdown(f"""
             <div class="metric-card">
-                <div class="metric-value">{count}</div>
-                <div class="metric-label">{name}</div>
+                <div class="metric-value">{status['environment']}</div>
+                <div class="metric-label">Environment</div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-value">{status['api_key']}</div>
+                <div class="metric-label">API Key</div>
             </div>
             """, unsafe_allow_html=True)
         
-        st.divider()
+        with col2:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-value">{status['directories']}</div>
+                <div class="metric-label">Directories</div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-value">{status['poppler']}</div>
+                <div class="metric-label">Poppler</div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # File counts
+        st.markdown("## 📁 File Counts")
+        
+        # Count files in each directory
+        pdf_input_count = len([f for f in os.listdir(config.PDF_INPUT_DIR) if f.endswith('.pdf')]) if os.path.exists(config.PDF_INPUT_DIR) else 0
+        txt_output_count = len([f for f in os.listdir(config.PDF_OUTPUT_DIR) if f.endswith('.txt')]) if os.path.exists(config.PDF_OUTPUT_DIR) else 0
+        xlsx_count = len([f for f in os.listdir(config.XLSX_OUTPUT_DIR) if f.endswith('.xlsx')]) if os.path.exists(config.XLSX_OUTPUT_DIR) else 0
+        
+        st.metric("📄 PDF Input", pdf_input_count)
+        st.metric("📝 TXT Output", txt_output_count)
+        st.metric("📊 XLSX Files", xlsx_count)
         
         # Quick actions
-        st.header("⚡ Quick Actions")
+        st.markdown("## ⚡ Quick Actions")
+        
         if st.button("🔄 Refresh Status", use_container_width=True):
             st.rerun()
         
-        if st.button("🗑️ Clear All Data", use_container_width=True):
-            if st.session_state.get('confirm_clear', False):
-                # Clear all directories
-                for path in [config.PDF_INPUT_DIR, config.PDF_OUTPUT_DIR, 
-                           config.XLSX_OUTPUT_DIR, config.DATE_VALIDATION_OUTPUT]:
-                    if os.path.exists(path):
-                        for file in os.listdir(path):
-                            os.remove(os.path.join(path, file))
-                log_status("All data cleared", "SUCCESS")
-                st.success("All data cleared!")
-                st.session_state.confirm_clear = False
-                st.rerun()
-            else:
-                st.session_state.confirm_clear = True
-                st.warning("Click again to confirm clearing all data")
+        if st.button("🗑️ Clear Data", use_container_width=True):
+            # Clear output directories
+            for dir_path in [config.PDF_OUTPUT_DIR, config.XLSX_OUTPUT_DIR, config.DATE_VALIDATION_OUTPUT]:
+                if os.path.exists(dir_path):
+                    for file in os.listdir(dir_path):
+                        os.remove(os.path.join(dir_path, file))
+            st.rerun()
         
         if st.button("📋 Clear Error Log", use_container_width=True):
             st.session_state.error_log = []
-            st.success("Error log cleared!")
             st.rerun()
     
-    # Main content tabs
-    tab1, tab2, tab3, tab4 = st.tabs(["🏠 Home", "📄 Run OCR", "📊 Results", "⚙️ Settings"])
+    # Main content with tabs
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+        "🏠 Home", 
+        "1️⃣ PDF → TXT", 
+        "2️⃣ TXT → XLSX", 
+        "3️⃣ XLSX Validation", 
+        "📊 Results", 
+        "⚙️ Settings"
+    ])
     
     with tab1:
-        st.header("Welcome to AI PDF Invoice Processor")
+        st.markdown("## 🚀 Welcome to AI PDF Invoice Processor")
         
-        # Workflow visualization
-        st.markdown("### 🔄 Processing Workflow")
-        
-        col1, col2, col3, col4 = st.columns(4)
+        # Features overview
+        col1, col2, col3 = st.columns(3)
         
         with col1:
             st.markdown("""
-            <div class="workflow-step">
-                <span class="step-number">1</span>
-                <strong>Upload PDFs</strong><br>
-                Drag & drop invoice files
+            <div class="feature-card">
+                <div class="feature-icon">📄</div>
+                <div class="feature-title">PDF Upload</div>
+                <div class="feature-description">Upload single or multiple PDF invoices for processing</div>
             </div>
             """, unsafe_allow_html=True)
         
         with col2:
             st.markdown("""
-            <div class="workflow-step">
-                <span class="step-number">2</span>
-                <strong>OCR Processing</strong><br>
-                Extract text with AI
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <div class="feature-title">AI OCR</div>
+                <div class="feature-description">Advanced AI-powered text extraction using Google Gemini</div>
             </div>
             """, unsafe_allow_html=True)
         
         with col3:
             st.markdown("""
-            <div class="workflow-step">
-                <span class="step-number">3</span>
-                <strong>Data Structure</strong><br>
-                Convert to Excel format
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <div class="feature-title">Data Validation</div>
+                <div class="feature-description">Automatic data structuring and validation with date processing</div>
             </div>
             """, unsafe_allow_html=True)
         
-        with col4:
-            st.markdown("""
-            <div class="workflow-step">
-                <span class="step-number">4</span>
-                <strong>Date Validation</strong><br>
-                Extract service periods
-            </div>
-            """, unsafe_allow_html=True)
+        # Workflow steps
+        st.markdown("## 🔄 Processing Workflow")
         
-        st.divider()
+        st.markdown("""
+        <div class="workflow-step">
+            <div class="workflow-step-number">1</div>
+            <h3>📄 PDF to Text Conversion</h3>
+            <p>Upload PDF invoices and convert them to text using AI-powered OCR technology. Each page is processed individually for maximum accuracy.</p>
+        </div>
+        """, unsafe_allow_html=True)
         
-        col1, col2 = st.columns(2)
+        st.markdown("""
+        <div class="workflow-step">
+            <div class="workflow-step-number">2</div>
+            <h3>📝 Text to Excel Structuring</h3>
+            <p>Transform extracted text into structured Excel format with proper columns and data organization for easy analysis.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <div class="workflow-step">
+            <div class="workflow-step-number">3</div>
+            <h3>✅ Data Validation & Processing</h3>
+            <p>Validate and process the structured data, including date formatting and data quality checks for final output.</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Current status
+        st.markdown("## 📈 Current Status")
+        
+        col1, col2, col3 = st.columns(3)
         
         with col1:
-            st.markdown("""
-            ### 🎯 Key Features
-            - **🤖 AI-Powered OCR** - High accuracy text extraction
-            - **📊 Smart Data Structure** - Organized Excel output
-            - **📅 Date Intelligence** - Service period extraction
-            - **☁️ Cloud Ready** - Works locally and on Streamlit Cloud
-            - **🔄 Real-time Processing** - Live progress tracking
-            - **📋 Error Logging** - Comprehensive status monitoring
-            """)
-        
-        with col2:
-            # Current processing status
-            st.markdown("### 📈 Current Status")
-            
-            # Last processing status
-            status_badge = "success-badge" if "Completed" in st.session_state.last_processing_status else "warning-badge"
             st.markdown(f"""
-            <div class="{status_badge}">
-                {st.session_state.last_processing_status}
+            <div class="metric-card">
+                <div class="metric-value">{st.session_state.last_processing_status}</div>
+                <div class="metric-label">Last Status</div>
             </div>
             """, unsafe_allow_html=True)
+        
+        with col2:
+            processing_time = "N/A"
+            if st.session_state.processing_start_time and st.session_state.processing_end_time:
+                duration = st.session_state.processing_end_time - st.session_state.processing_start_time
+                processing_time = f"{duration.total_seconds():.1f}s"
             
-            # Quick stats
-            col2a, col2b = st.columns(2)
-            with col2a:
-                st.metric("📄 PDF Files", counts['PDF Input'])
-                st.metric("📝 Text Files", counts['OCR Text'])
-            with col2b:
-                st.metric("📊 Excel Files", counts['Structured Excel'])
-                st.metric("✅ Validated", counts['Date Validated'])
-            
-            # System health
-            st.markdown("### 🔧 System Health")
-            if status['environment'] == "✅ OK" and status['api_key'] == "✅ Configured":
-                st.success("🟢 All systems operational")
-            else:
-                st.error("🔴 System issues detected - check Settings tab")
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-value">{processing_time}</div>
+                <div class="metric-label">Processing Time</div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col3:
+            error_count = len([log for log in st.session_state.error_log if log["type"] == "ERROR"])
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-value">{error_count}</div>
+                <div class="metric-label">Errors</div>
+            </div>
+            """, unsafe_allow_html=True)
     
     with tab2:
-        st.header("📄 Process PDF Invoices")
+        st.markdown("## 1️⃣ PDF to Text Conversion")
+        
+        st.markdown("""
+        <div class="step-card">
+            <div class="step-number">1</div>
+            <div class="step-title">Upload PDF Invoices</div>
+            <div class="step-description">Select one or more PDF invoice files to process. The system will extract text from each page using AI-powered OCR.</div>
+        </div>
+        """, unsafe_allow_html=True)
         
         # File upload
         uploaded_files = st.file_uploader(
-            "Choose PDF files to process",
+            "Choose PDF files",
             type=['pdf'],
             accept_multiple_files=True,
-            help="Upload one or more PDF invoice files"
+            help="Upload PDF invoice files for text extraction"
         )
         
         if uploaded_files:
-            st.success(f"📁 {len(uploaded_files)} file(s) selected")
-            
-            # Show file details
-            with st.expander("📋 File Details"):
-                for file in uploaded_files:
-                    st.write(f"• {file.name} ({file.size:,} bytes)")
+            st.success(f"📁 {len(uploaded_files)} file(s) selected for processing")
             
             # Process button
-            col1, col2, col3 = st.columns([1, 1, 2])
-            
-            with col1:
-                if st.button("💾 Save Files", type="primary"):
-                    # Save uploaded files to input directory
-                    saved_count = 0
-                    for uploaded_file in uploaded_files:
-                        file_path = os.path.join(config.PDF_INPUT_DIR, uploaded_file.name)
-                        with open(file_path, "wb") as f:
-                            f.write(uploaded_file.getbuffer())
-                        saved_count += 1
-                    st.success(f"✅ Saved {saved_count} files to input directory")
-                    st.rerun()
-            
-            with col2:
-                if st.button("🔄 Process All", type="secondary"):
-                    # Start timing
-                    st.session_state.processing_start_time = datetime.now()
-                    log_status("Starting full workflow processing", "INFO")
-                    
-                    # Run the full workflow
-                    progress_bar = st.progress(0)
-                    status_placeholder = st.empty()
-                    
-                    # Step 1: PDF to TXT
-                    status_placeholder.info("🔄 Step 1: Converting PDFs to text...")
-                    success1, message1 = run_pdf_to_txt(uploaded_files, progress_bar, status_placeholder)
-                    
-                    if success1:
-                        # Step 2: TXT to XLSX
-                        status_placeholder.info("🔄 Step 2: Converting text to structured Excel...")
-                        progress_bar.progress(0.5)
-                        success2, message2 = run_txt_to_xlsx(progress_bar, status_placeholder)
-                        
-                        if success2:
-                            # Step 3: Date validation
-                            status_placeholder.info("🔄 Step 3: Extracting and validating dates...")
-                            progress_bar.progress(0.8)
-                            success3, message3 = run_date_validation(progress_bar, status_placeholder)
-                            
-                            if success3:
-                                progress_bar.progress(1.0)
-                                st.session_state.processing_end_time = datetime.now()
-                                log_status("All processing completed successfully", "SUCCESS")
-                                status_placeholder.success("🎉 All processing completed successfully!")
-                                st.balloons()
-                            else:
-                                st.session_state.processing_end_time = datetime.now()
-                                log_error(f"Step 3 failed: {message3}", "ERROR")
-                                status_placeholder.error(f"❌ Step 3 failed: {message3}")
-                        else:
-                            st.session_state.processing_end_time = datetime.now()
-                            log_error(f"Step 2 failed: {message2}", "ERROR")
-                            status_placeholder.error(f"❌ Step 2 failed: {message2}")
-                    else:
-                        st.session_state.processing_end_time = datetime.now()
-                        log_error(f"Step 1 failed: {message1}", "ERROR")
-                        status_placeholder.error(f"❌ Step 1 failed: {message1}")
+            if st.button("🚀 Start PDF Processing", type="primary", use_container_width=True):
+                st.session_state.processing_start_time = datetime.now()
+                
+                # Progress bar
+                progress_bar = st.progress(0)
+                status_placeholder = st.empty()
+                
+                # Process files
+                success, message = run_pdf_to_txt(uploaded_files, progress_bar, status_placeholder)
+                
+                st.session_state.processing_end_time = datetime.now()
+                
+                if success:
+                    progress_bar.progress(100)
+                    st.success(f"✅ {message}")
+                    log_status("PDF processing completed successfully", "SUCCESS")
+                else:
+                    st.error(f"❌ {message}")
+                    log_error(f"PDF processing failed: {message}", "ERROR")
+        else:
+            st.info("👆 Please upload PDF files to begin processing")
     
     with tab3:
-        st.header("📊 Results & Data")
+        st.markdown("## 2️⃣ Text to Excel Structuring")
         
-        # Show available Excel files
-        excel_files = []
-        for directory in [config.XLSX_OUTPUT_DIR, config.DATE_VALIDATION_OUTPUT]:
-            if os.path.exists(directory):
-                excel_files.extend([os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.xlsx')])
+        st.markdown("""
+        <div class="step-card">
+            <div class="step-number">2</div>
+            <div class="step-title">Convert Text to Structured Excel</div>
+            <div class="step-description">Transform extracted text files into structured Excel format with proper columns and data organization.</div>
+        </div>
+        """, unsafe_allow_html=True)
         
-        if excel_files:
-            st.subheader("📈 Available Reports")
+        # Check if TXT files exist
+        txt_files = []
+        if os.path.exists(config.PDF_OUTPUT_DIR):
+            txt_files = [f for f in os.listdir(config.PDF_OUTPUT_DIR) if f.endswith('.txt')]
+        
+        if txt_files:
+            st.success(f"📝 Found {len(txt_files)} text file(s) ready for processing")
             
-            for excel_file in excel_files:
-                filename = os.path.basename(excel_file)
-                st.write(f"**{filename}**")
+            # Process button
+            if st.button("🔄 Start TXT to XLSX Conversion", type="primary", use_container_width=True):
+                st.session_state.processing_start_time = datetime.now()
                 
-                try:
-                    df = pd.read_excel(excel_file)
-                    st.dataframe(df, use_container_width=True)
-                    
-                    # Download button
-                    with open(excel_file, 'rb') as f:
-                        st.download_button(
-                            label=f"📥 Download {filename}",
-                            data=f.read(),
-                            file_name=filename,
-                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                        )
-                    st.divider()
-                except Exception as e:
-                    st.error(f"Error reading {filename}: {str(e)}")
+                # Progress bar
+                progress_bar = st.progress(0)
+                status_placeholder = st.empty()
+                
+                status_placeholder.info("🔄 Converting text files to Excel format...")
+                progress_bar.progress(50)
+                
+                # Process files
+                success, message = run_txt_to_xlsx()
+                
+                st.session_state.processing_end_time = datetime.now()
+                
+                if success:
+                    progress_bar.progress(100)
+                    st.success(f"✅ {message}")
+                    log_status("TXT to XLSX conversion completed successfully", "SUCCESS")
+                else:
+                    st.error(f"❌ {message}")
+                    log_error(f"TXT to XLSX conversion failed: {message}", "ERROR")
         else:
-            st.info("No Excel files found. Process some PDFs first!")
+            st.warning("⚠️ No text files found. Please complete PDF processing first.")
     
     with tab4:
-        st.header("⚙️ Settings & System Monitor")
+        st.markdown("## 3️⃣ XLSX Validation & Date Processing")
+        
+        st.markdown("""
+        <div class="step-card">
+            <div class="step-number">3</div>
+            <div class="step-title">Validate and Process Data</div>
+            <div class="step-description">Validate the structured Excel data, process dates, and perform final data quality checks.</div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Check if XLSX files exist
+        xlsx_files = []
+        if os.path.exists(config.XLSX_OUTPUT_DIR):
+            xlsx_files = [f for f in os.listdir(config.XLSX_OUTPUT_DIR) if f.endswith('.xlsx')]
+        
+        if xlsx_files:
+            st.success(f"📊 Found {len(xlsx_files)} Excel file(s) ready for validation")
+            
+            # Process button
+            if st.button("✅ Start Data Validation", type="primary", use_container_width=True):
+                st.session_state.processing_start_time = datetime.now()
+                
+                # Progress bar
+                progress_bar = st.progress(0)
+                status_placeholder = st.empty()
+                
+                status_placeholder.info("🔄 Validating and processing data...")
+                progress_bar.progress(50)
+                
+                # Process files
+                success, message = run_xlsx_validation()
+                
+                st.session_state.processing_end_time = datetime.now()
+                
+                if success:
+                    progress_bar.progress(100)
+                    st.success(f"✅ {message}")
+                    log_status("Data validation completed successfully", "SUCCESS")
+                else:
+                    st.error(f"❌ {message}")
+                    log_error(f"Data validation failed: {message}", "ERROR")
+        else:
+            st.warning("⚠️ No Excel files found. Please complete TXT to XLSX conversion first.")
+    
+    with tab5:
+        display_results()
+    
+    with tab6:
+        st.markdown("## ⚙️ Settings & System Status")
         
         # System Status Overview
+        st.markdown("### 🔧 System Status Overview")
+        
         status = get_system_status()
         
         col1, col2, col3, col4 = st.columns(4)
@@ -837,110 +1184,106 @@ def main():
         with col3:
             st.markdown(f"""
             <div class="metric-card">
-                <div class="metric-value">{status['poppler']}</div>
-                <div class="metric-label">Poppler</div>
+                <div class="metric-value">{status['directories']}</div>
+                <div class="metric-label">Directories</div>
             </div>
             """, unsafe_allow_html=True)
         
         with col4:
             st.markdown(f"""
             <div class="metric-card">
-                <div class="metric-value">{status['directories']}</div>
-                <div class="metric-label">Directories</div>
+                <div class="metric-value">{status['poppler']}</div>
+                <div class="metric-label">Poppler</div>
             </div>
             """, unsafe_allow_html=True)
         
-        st.divider()
+        # Error Log & Status
+        st.markdown("### 📋 Error Log & Status")
         
-        # Error Log and Status
-        col1, col2 = st.columns([2, 1])
-        
+        # Filter options
+        col1, col2 = st.columns([3, 1])
         with col1:
-            st.subheader("📋 Error Log & Status")
-            
-            if st.session_state.error_log:
-                # Filter options
-                filter_type = st.selectbox("Filter by type:", ["All", "ERROR", "WARNING", "INFO", "SUCCESS"])
-                
-                # Display filtered logs
-                filtered_logs = st.session_state.error_log
-                if filter_type != "All":
-                    filtered_logs = [log for log in st.session_state.error_log if log["type"] == filter_type]
-                
-                # Show logs in a scrollable container
-                log_content = ""
-                for log in reversed(filtered_logs[-20:]):  # Show last 20 entries
-                    badge_class = f"{log['type'].lower()}-badge" if log['type'] in ["ERROR", "WARNING", "SUCCESS"] else "info-badge"
-                    log_content += f"""
-                    <div style="margin: 0.5rem 0; padding: 0.5rem; border-left: 3px solid {'#dc3545' if log['type'] == 'ERROR' else '#ffc107' if log['type'] == 'WARNING' else '#28a745' if log['type'] == 'SUCCESS' else '#17a2b8'}; background: #f8f9fa;">
-                        <span class="{badge_class}">{log['type']}</span>
-                        <span style="color: #6c757d; font-size: 0.8rem;">{log['timestamp']}</span><br>
-                        <span style="font-family: monospace;">{log['message']}</span>
-                    </div>
-                    """
-                
+            log_filter = st.selectbox("Filter by type:", ["All", "ERROR", "WARNING", "INFO", "SUCCESS"])
+        with col2:
+            if st.button("🗑️ Clear Log", use_container_width=True):
+                st.session_state.error_log = []
+                st.rerun()
+        
+        # Display filtered logs
+        filtered_logs = st.session_state.error_log
+        if log_filter != "All":
+            filtered_logs = [log for log in st.session_state.error_log if log["type"] == log_filter]
+        
+        if filtered_logs:
+            st.markdown('<div class="error-log">', unsafe_allow_html=True)
+            for log in reversed(filtered_logs[-20:]):  # Show last 20 entries
                 st.markdown(f"""
-                <div class="error-log">
-                    {log_content if log_content else "No logs to display"}
+                <div class="error-entry {log['type']}">
+                    <strong>[{log['timestamp']}] {log['type']}:</strong> {log['message']}
                 </div>
                 """, unsafe_allow_html=True)
-            else:
-                st.info("No error logs yet. Start processing some PDFs to see activity here.")
+            st.markdown('</div>', unsafe_allow_html=True)
+        else:
+            st.info("No log entries found.")
+        
+        # Configuration
+        st.markdown("### ⚙️ Configuration")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("**API Configuration:**")
+            st.text(f"Model: {config.GEMINI_MODEL}")
+            st.text(f"API Key: {'Configured' if config.GEMINI_API_KEY and config.GEMINI_API_KEY != 'your_gemini_api_key_here' else 'Not configured'}")
         
         with col2:
-            st.subheader("🔧 Configuration")
-            
-            # Current settings
-            st.markdown("**API Settings:**")
-            st.code(f"""
-Model: {config.GEMINI_MODEL}
-Batch Size: {config.API_BATCH_SIZE}
-Delay: {config.API_DELAY_SECONDS}s
-Max Retries: {config.API_MAX_RETRIES}
-Debug: {config.DEBUG_MODE}
-            """)
-            
             st.markdown("**Processing Settings:**")
-            st.code(f"""
-Max Workers: {config.MAX_WORKERS}
-Date Format: {config.DATE_FORMAT}
-VAT Tolerance: {config.VAT_TOLERANCE}
-            """)
-            
-            # Quick actions
-            st.markdown("**Quick Actions:**")
+            st.text(f"PDF Input: {config.PDF_INPUT_DIR}")
+            st.text(f"TXT Output: {config.PDF_OUTPUT_DIR}")
+            st.text(f"XLSX Output: {config.XLSX_OUTPUT_DIR}")
+            st.text(f"Validation Output: {config.DATE_VALIDATION_OUTPUT}")
+        
+        # Quick Actions
+        st.markdown("### ⚡ Quick Actions")
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
             if st.button("🔄 Refresh Status", use_container_width=True):
                 st.rerun()
-            
-            if st.button("📋 Clear Logs", use_container_width=True):
-                st.session_state.error_log = []
-                st.success("Logs cleared!")
+        
+        with col2:
+            if st.button("🗑️ Clear All Data", use_container_width=True):
+                # Clear output directories
+                for dir_path in [config.PDF_OUTPUT_DIR, config.XLSX_OUTPUT_DIR, config.DATE_VALIDATION_OUTPUT]:
+                    if os.path.exists(dir_path):
+                        for file in os.listdir(dir_path):
+                            os.remove(os.path.join(dir_path, file))
                 st.rerun()
-            
-            if st.button("🔍 Test Poppler", use_container_width=True):
+        
+        with col3:
+            if st.button("🧪 Test Poppler", use_container_width=True):
                 try:
                     import subprocess
-                    result = subprocess.run(['pdftoppm', '-v'], capture_output=True, text=True)
+                    result = subprocess.run(['pdftoppm', '-h'], capture_output=True, text=True)
                     if result.returncode == 0:
-                        st.success("✅ Poppler working!")
+                        st.success("✅ Poppler is working correctly")
                     else:
-                        st.error("❌ Poppler not working")
-                except:
-                    st.error("❌ Poppler not found")
-        
-        st.divider()
+                        st.error("❌ Poppler test failed")
+                except Exception as e:
+                    st.error(f"❌ Poppler test failed: {str(e)}")
         
         # Directory Status
-        st.subheader("📁 Directory Status")
+        st.markdown("### 📁 Directory Status")
         
-        directories = {
-            "PDF Input": config.PDF_INPUT_DIR,
-            "PDF Output": config.PDF_OUTPUT_DIR,
-            "Excel Output": config.XLSX_OUTPUT_DIR,
-            "Date Validation": config.DATE_VALIDATION_OUTPUT
-        }
+        directories = [
+            ("PDF Input", config.PDF_INPUT_DIR),
+            ("TXT Output", config.PDF_OUTPUT_DIR),
+            ("XLSX Output", config.XLSX_OUTPUT_DIR),
+            ("Validation Output", config.DATE_VALIDATION_OUTPUT)
+        ]
         
-        for name, path in directories.items():
+        for name, path in directories:
             exists = os.path.exists(path)
             file_count = len(os.listdir(path)) if exists else 0
             
@@ -952,44 +1295,28 @@ VAT Tolerance: {config.VAT_TOLERANCE}
                 st.text(f"{status_icon} {file_count} files")
             with col3:
                 if exists:
-                    st.success("OK")
+                    st.text("Ready")
                 else:
-                    st.error("Missing")
+                    st.text("Missing")
         
-        st.divider()
+        # Deployment Information
+        st.markdown("### 🚀 Deployment Information")
         
-        # Deployment Info
-        st.subheader("🚀 Deployment Information")
+        st.markdown("""
+        **Local Development:**
+        ```bash
+        streamlit run app_streamlit.py
+        ```
         
-        col1, col2 = st.columns(2)
+        **Streamlit Cloud Deployment:**
+        1. Push code to GitHub repository
+        2. Connect repository to Streamlit Cloud
+        3. Set environment variables (GEMINI_API_KEY)
+        4. Deploy application
         
-        with col1:
-            st.markdown("""
-            **Local Development:**
-            ```bash
-            streamlit run app_streamlit.py
-            ```
-            
-            **Requirements:**
-            - Python 3.8+
-            - All dependencies installed
-            - Valid Gemini API key
-            - Poppler installed
-            """)
-        
-        with col2:
-            st.markdown("""
-            **Streamlit Cloud:**
-            1. Push code to GitHub
-            2. Connect to Streamlit Cloud
-            3. Set `GEMINI_API_KEY` environment variable
-            4. Deploy!
-            
-            **Cloud Features:**
-            - ✅ Handles uploaded files in memory
-            - ✅ Temporary file management
-            - ✅ Automatic cleanup
-            """)
+        **Environment Variables Required:**
+        - `GEMINI_API_KEY`: Your Google Gemini API key
+        """)
 
 if __name__ == "__main__":
     main()

@@ -13,7 +13,7 @@ load_dotenv()
 
 API_KEY = config.GEMINI_API_KEY
 if not API_KEY or API_KEY == "your_gemini_api_key_here":
-    raise EnvironmentError("❌ GEMINI_API_KEY not set in .env file.")
+    raise EnvironmentError("[ERROR] GEMINI_API_KEY not set in .env file.")
 
 genai.configure(api_key=API_KEY)
 
@@ -83,11 +83,11 @@ def extract_invoice_details(text, filename):
             invoice_details['pdf_name'] = filename.replace('.txt', '')
             return invoice_details
         except json.JSONDecodeError:
-            print(f"❌ Could not parse JSON from response for {filename}")
+            print(f"[ERROR] Could not parse JSON from response for {filename}")
             print(f"Response text: {response.text[:500]}...")
             return {'pdf_name': filename.replace('.txt', ''), 'error': 'JSON parsing error'}
     except Exception as e:
-        print(f"❌ API call failed for {filename}: {e}")
+        print(f"[ERROR] API call failed for {filename}: {e}")
         return {'pdf_name': filename.replace('.txt', ''), 'error': str(e)}
 
 def validate_invoice(invoice_data):
@@ -245,7 +245,7 @@ def process_txt_to_excel(input_dir, output_dir, batch_size=5, delay_seconds=1):
                 all_data.append(cleaned_data)
                 
             except Exception as e:
-                print(f"❌ Error processing {txt_file}: {e}")
+                print(f"[ERROR] Error processing {txt_file}: {e}")
                 all_data.append({
                     'pdf_name': txt_file.replace('.txt', ''), 
                     'error': str(e),
@@ -299,7 +299,7 @@ def process_txt_to_excel(input_dir, output_dir, batch_size=5, delay_seconds=1):
     
     # Save to Excel
     df.to_excel(output_file, index=False)
-    print(f"✅ Excel file created: {output_file}")
+    print(f"[SUCCESS] Excel file created: {output_file}")
     
     # Create a summary
     print("\nSummary:")
@@ -311,6 +311,13 @@ def process_txt_to_excel(input_dir, output_dir, batch_size=5, delay_seconds=1):
 
 # Main execution
 if __name__ == "__main__":
+    import sys
+    # Fix Windows console encoding for Unicode characters
+    if sys.platform == 'win32':
+        import io
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+    
     input_dir = config.TXT_INPUT_DIR
     output_dir = config.XLSX_OUTPUT_DIR
     

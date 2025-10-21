@@ -5,6 +5,7 @@ Step 4 - Process data and extract service dates using Gemini
 import os
 import re
 import json
+import sys
 import pandas as pd
 import datetime
 import concurrent.futures
@@ -15,11 +16,17 @@ from config import config
 from dateutil.relativedelta import relativedelta
 from tqdm import tqdm
 
+# Fix Windows console encoding for Unicode characters
+if sys.platform == 'win32':
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+
 # Load API key
 load_dotenv()
 API_KEY = config.GEMINI_API_KEY
 if not API_KEY or API_KEY == "your_gemini_api_key_here":
-    raise EnvironmentError("❌ GEMINI_API_KEY not set.")
+    raise EnvironmentError("[ERROR] GEMINI_API_KEY not set.")
 genai.configure(api_key=API_KEY)
 
 # Paths
@@ -163,12 +170,12 @@ def process_invoice_batch(batch_rows):
     return results
 
 def main():
-    print(f"🔄 Starting Step 4 - Processing data and extracting service dates")
+    print(f"[INFO] Starting Step 4 - Processing data and extracting service dates")
     try:
         df = pd.read_excel(input_excel)
-        print(f"✅ Loaded Excel with {len(df)} records")
+        print(f"[SUCCESS] Loaded Excel with {len(df)} records")
     except Exception as e:
-        print(f"❌ Error loading Excel file: {e}")
+        print(f"[ERROR] Error loading Excel file: {e}")
         return
 
     df['path'] = df.apply(
@@ -179,7 +186,7 @@ def main():
 
     rows = df.to_dict('records')
     batches = [rows[i:i+BATCH_SIZE] for i in range(0, len(rows), BATCH_SIZE)]
-    print(f"🔢 Split data into {len(batches)} batches")
+    print(f"[INFO] Split data into {len(batches)} batches")
 
     all_results = []
     with tqdm(total=len(batches), desc="Processing batches") as pbar:
@@ -191,7 +198,7 @@ def main():
                     try:
                         all_results.extend(future.result())
                     except Exception as e:
-                        print(f"❌ Error processing batch: {e}")
+                        print(f"[ERROR] Error processing batch: {e}")
             pbar.update(1)
             if i < len(batches) - 1:
                 time.sleep(API_DELAY)
@@ -207,13 +214,13 @@ def main():
 
     try:
         df_out.to_excel(output_excel, index=False)
-        print(f"✅ Step 4 done. Output saved to: {output_excel}")
+        print(f"[SUCCESS] Step 4 done. Output saved to: {output_excel}")
     except Exception as e:
-        print(f"❌ Error saving Excel file: {e}")
+        print(f"[ERROR] Error saving Excel file: {e}")
 
-    print(f"📊 API Cache statistics:")
+    print(f"[INFO] API Cache statistics:")
     print(f"  - Total cache entries: {len(service_dates_cache)}")
-    print(f"📊 Processing statistics:")
+    print(f"[INFO] Processing statistics:")
     print(f"  - Total invoices processed: {len(all_results)}")
     print(f"  - Invoices with valid dates: {sum(1 for r in all_results if r.get('date_serv_start') != 'N/A')}")
     print(f"  - Invoices with valid VAT: {sum(1 for r in all_results if r.get('vat_valid', False))}")
