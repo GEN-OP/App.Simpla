@@ -1,54 +1,42 @@
 
-
 --- Page 1 ---
-```text
 Factura
-Data Emitere 10.10.2024
 GEN 0002
-Data Scadenta
-09.11.2024
+Data Emitere 10.10.2024
+Data Scadenta 09.11.2024
+
 Furnizor
-Client
 GEN OPERATIONS S.R.L.
-PROSPECT DRILL S.R.L.
 CUI: 50603245
-CUI: RO23469376
 Reg. Com: J2024025332007
-Reg. Com: J40/4403/2008
 Jud: Bucuresti, loc: Sector-4
-Jud: Bucuresti, loc: Sector-3
 Str: MUNICIPIUL BUCURESTI, SECTOR 4, SOS BERCENI,
-Str: MUNICIPIUL BUCURESTI, SECTOR 3, ALEEA
-NR.35, BL.104, SC.3, ET.4, ΑΡ.93
-POSTAVARULUI, NR.6, BL.D2, SC.1, ET.10, ΑΡ.209
+NR.35, BL.104, SC.3, ET.4, AP.93
 Banca: BANCA TRANSILVANIA
-Banca:
 IBAN: RO63BTRLRONCRT0689326501
+
+Client
+PROSPECT DRILL S.R.L.
+CUI: RO23469376
+Reg. Com: J40/4403/2008
+Jud: Bucuresti, loc: Sector-3
+Str: MUNICIPIUL BUCURESTI, SECTOR 3, ALEEA
+POSTAVARULUI, NR.6, BL.D2, SC.1, ET.10, AP.209
+Banca:
 IBAN:
 
-# Articol
-UM
-Cantitate
-Pret Valoare
-Total
-1
-Intocmire lista cantitati - Pasaj
-superior peste CF Port Constanța
-ORE
-10
-150
-1 500
-1 500
-Total fara TVA:
-Total:
-1500
-1 500 Lei
+# Articol UM Cantitate Pret Valoare Total
+1 Intocmire lista cantitati - Pasaj superior peste CF Port Constanța
+ORE 10 150 1500 1500
+
 Instructiuni de plata
-IBAN:
-RO63BTRLRONCRT0689326501
+IBAN: RO63BTRLRONCRT0689326501
 Banca: BANCA TRANSILVANIA
+
+Total fara TVA: 1500
+Total: 1500 Lei
 
 Factura circula fara semnatura si stampila cf. art.V, alin (2) din Ordonanta nr.17/2015 si art. 319 alin (29) din
 Legea nr. 227/2015 privind Codul fiscal.
 GEN 0002 1500 Lei scadenta la 09.11.2024
-```
+
