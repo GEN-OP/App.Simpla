@@ -1,14 +1,11 @@
 
 --- Page 1 ---
-Here is the extracted text from the invoice image:
-
-**Factura**
+Factura
 GEN 0002
+Data Emitere 10.10.2024
+Data Scadenta 09.11.2024
 
-**Data Emitere** 10.10.2024
-**Data Scadenta** 09.11.2024
-
-**Furnizor**
+Furnizor
 GEN OPERATIONS S.R.L.
 CUI: 50603245
 Reg. Com: J2024025332007
@@ -18,7 +15,7 @@ NR.35, BL.104, SC.3, ET.4, AP.93
 Banca: BANCA TRANSILVANIA
 IBAN: RO63BTRLRONCRT0689326501
 
-**Client**
+Client
 PROSPECT DRILL S.R.L.
 CUI: RO23469376
 Reg. Com: J40/4403/2008
@@ -28,19 +25,18 @@ POSTAVARULUI, NR.6, BL.D2, SC.1, ET.10, AP.209
 Banca:
 IBAN:
 
-| # | Articol | UM  | Cantitate | Pret | Valoare | Total |
-|---|---|---|---|---|---|---|
-| 1 | Intocmire lista cantitati - Pasaj superior peste CF Port Constanţa | ORE | 10 | 150 | 1 500 | 1 500 |
+# Articol UM Cantitate Pret Valoare Total
+1 Intocmire lista cantitati - Pasaj superior peste CF Port Constanța
+ORE 10 150 1500 1500
 
-**Total fara TVA:** 1 500
-**Total:** 1 500 Lei
-
-**Instructiuni de plata**
+Instructiuni de plata
 IBAN: RO63BTRLRONCRT0689326501
 Banca: BANCA TRANSILVANIA
 
+Total fara TVA: 1500
+Total: 1500 Lei
+
 Factura circula fara semnatura si stampila cf. art.V, alin (2) din Ordonanta nr.17/2015 si art. 319 alin (29) din
 Legea nr. 227/2015 privind Codul fiscal.
-
 GEN 0002 1500 Lei scadenta la 09.11.2024
 
