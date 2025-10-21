@@ -7,8 +7,8 @@ openpyxl>=3.1.0
 # Google Generative AI
 google-generativeai>=0.3.0
 
-# PDF processing
-pdf2image>=1.17.0
+# PDF processing - PyMuPDF for cloud compatibility (no Poppler required)
+PyMuPDF>=1.23.0
 Pillow>=10.0.0
 
 # Date processing

@@ -615,9 +615,12 @@ def check_environment():
         return False, f"Environment check failed: {str(e)}"
 
 def run_pdf_to_txt(uploaded_files, progress_bar, status_placeholder):
-    """Run PDF to TXT conversion with uploaded files"""
+    """Run PDF to TXT conversion with uploaded files - Cloud compatible"""
     try:
-        from pdf2image import convert_from_path
+        # Using PyMuPDF instead of pdf2image for Streamlit Cloud (no Poppler needed)
+        import fitz  # PyMuPDF
+        import io
+        from PIL import Image
         import google.generativeai as genai
         from pathlib import Path
         import tempfile
@@ -641,16 +644,24 @@ def run_pdf_to_txt(uploaded_files, progress_bar, status_placeholder):
                 f.write(uploaded_file.getbuffer())
             
             try:
-                # Convert PDF to images
-                images = convert_from_path(str(temp_pdf_path))
+                # Open PDF with PyMuPDF (works everywhere, no Poppler needed)
+                doc = fitz.open(str(temp_pdf_path))
+                total_pages = len(doc)
                 
                 # Process each page with Gemini
                 full_text = ""
-                for i, image in enumerate(images):
-                    log_status(f"Processing page {i+1}/{len(images)} of {uploaded_file.name}", "INFO")
+                for page_num in range(total_pages):
+                    log_status(f"Processing page {page_num+1}/{total_pages} of {uploaded_file.name}", "INFO")
                     
-                    # Convert image to bytes
-                    import io
+                    # Render page to image using PyMuPDF
+                    page = doc[page_num]
+                    pix = page.get_pixmap(dpi=150)  # 150 DPI for good quality
+                    
+                    # Convert to PIL Image
+                    img_data = pix.tobytes("png")
+                    image = Image.open(io.BytesIO(img_data))
+                    
+                    # Convert image to bytes for Gemini
                     img_byte_arr = io.BytesIO()
                     image.save(img_byte_arr, format='PNG')
                     img_byte_arr = img_byte_arr.getvalue()
@@ -666,7 +677,10 @@ def run_pdf_to_txt(uploaded_files, progress_bar, status_placeholder):
                     ])
                     
                     if response.text:
-                        full_text += f"\n--- Page {i+1} ---\n{response.text}\n"
+                        full_text += f"\n--- Page {page_num+1} ---\n{response.text}\n"
+                
+                # Close PDF document
+                doc.close()
                 
                 # Save extracted text
                 base_name = os.path.splitext(uploaded_file.name)[0]
