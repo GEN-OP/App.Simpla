@@ -1,0 +1,153 @@
+
+
+--- Page 1 ---
+
+
+--- Page 1 ---
+
+
+--- Page 1 ---
+
+
+--- Page 1 ---
+
+
+--- Page 1 ---
+```
+Factura
+GEN 0005
+Data Emitere 26.11.2024
+Data Scadenta 26.12.2024
+
+Furnizor
+GEN OPERATIONS S.R.L.
+CUI: 50603245
+Reg. Com: J2024025332007
+Tara: ROMΑΝΙΑ
+Jud: Bucuresti, loc: Sector-4
+Str: MUNICIPIUL BUCURESTI, SECTOR 4, SOS BERCENI,
+NR.35, BL.104, SC.3, ET.4, ΑΡ.93
+Banca: BANCA TRANSILVANIA
+IBAN: RO63BTRLRONCRT0689326501
+Client
+PROSPECT DRILL S.R.L.
+CUI: RO23469376
+Reg. Com: J40/4403/2008
+Tara: ROMΑΝΙΑ
+Jud: Bucuresti, loc: Sector-3
+Str: MUNICIPIUL BUCURESTI, SECTOR 3, ALEEA
+POSTAVARULUI, NR.6, BL.D2, SC.1, ET.10, ΑΡ.209
+Banca:
+IBAN:
+
+# Articol UM Cantitate Pret Valoare Total
+1 Intocmire si calcul liste de cantitati
+Pod DN54 km 64+001 si Pasaj peste
+AO
+ORE 23 150 3 450 3 450
+
+Instructiuni de plata
+Banca/IBAN: BANCA TRANSILVANIA
+Banca/IBAN: RO63BTRLRONCRT0689326501
+Total fara TVA: 3 450
+Total: 3 450 Lei
+
+Factura circula fara semnatura si stampila cf. art.V, alin (2) din Ordonanta nr.17/2015 si art. 319 alin (29) din
+Legea nr. 227/2015 privind Codul fiscal.
+GEN 0005 3 450 Lei scadenta la 26.12.2024
+```
+
+--- Page 1 ---
+Factura
+GEN 0005
+Data Emitere 26.11.2024
+Data Scadenta 26.12.2024
+
+Furnizor
+GEN OPERATIONS S.R.L.
+CUI: 50603245
+Reg. Com: J2024025332007
+Tara: ROMÂNIA
+Jud: Bucuresti, loc: Sector-4
+Str: MUNICIPIUL BUCURESTI, SECTOR 4, SOS BERCENI,
+NR.35, BL.104, SC.3, ET.4, AP.93
+Banca: BANCA TRANSILVANIA
+IBAN: RO63BTRLRONCRT0689326501
+Client
+PROSPECT DRILL S.R.L.
+CUI: RO23469376
+Reg. Com: J40/4403/2008
+Tara: ROMÂNIA
+Jud: Bucuresti, loc: Sector-3
+Str: MUNICIPIUL BUCURESTI, SECTOR 3, ALEEA
+POSTAVARULUI, NR.6, BL.D2, SC.1, ET.10, AP.209
+Banca:
+IBAN:
+
+# Articol
+1 Intocmire si calcul liste de cantitati
+Pod DN54 km 64+001 si Pasaj peste
+AO
+UM
+Cantitate
+ORE 23
+Pret
+150
+Valoare
+3 450
+Total
+3 450
+
+Instructiuni de plata
+Banca/IBAN: BANCA TRANSILVANIA
+Banca/IBAN: RO63BTRLRONCRT0689326501
+Total fara TVA: 3 450
+Total: 3 450 Lei
+
+Factura circula fara semnatura si stampila cf. art.V, alin (2) din Ordonanta nr.17/2015 si art. 319 alin (29) din
+Legea nr. 227/2015 privind Codul fiscal.
+GEN 0005 3 450 Lei scadenta la 26.12.2024
+
+
+--- Page 1 ---
+Factura
+GEN 0005
+Data Emitere 26.11.2024
+Data Scadenta 26.12.2024
+
+Furnizor
+GEN OPERATIONS S.R.L.
+CUI: 50603245
+Reg. Com: J2024025332007
+Tara: ROMÂNIA
+Jud: Bucuresti, loc: Sector-4
+Str: MUNICIPIUL BUCURESTI, SECTOR 4, SOS BERCENI,
+NR.35, BL.104, SC.3, ET.4, AP.93
+Banca: BANCA TRANSILVANIA
+IBAN: RO63BTRLRONCRT0689326501
+
+Client
+PROSPECT DRILL S.R.L.
+CUI: RO23469376
+Reg. Com: J40/4403/2008
+Tara: ROMÂNIA
+Jud: Bucuresti, loc: Sector-3
+Str: MUNICIPIUL BUCURESTI, SECTOR 3, ALEEA
+POSTAVARULUI, NR.6, BL.D2, SC.1, ET.10, AP.209
+Banca:
+IBAN:
+# Articol	UM	Cantitate	Pret	Valoare	Total
+1 Intocmire si calcul liste de cantitati	ORE	23	150	3 450	3 450
+Pod DN54 km 64+001 si Pasaj peste
+AO
+
+Instructiuni de plata
+Banca/IBAN: BANCA TRANSILVANIA
+Banca/IBAN: RO63BTRLRONCRT0689326501
+Total fara TVA: 3 450
+Total: 3 450 Lei
+
+Factura circula fara semnatura si stampila cf. art.V, alin (2) din Ordonanta nr.17/2015 si art. 319 alin (29) din
+Legea nr. 227/2015 privind Codul fiscal.
+
+GEN 0005 3 450 Lei scadenta la 26.12.2024

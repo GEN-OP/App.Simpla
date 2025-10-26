@@ -6,8 +6,31 @@ Contains all environment variables and path configurations
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
+# Load environment variables from .env file (for local development)
 load_dotenv()
+
+# Try to import Streamlit for secrets management (for Streamlit Cloud)
+try:
+    import streamlit as st
+    _streamlit_available = True
+except ImportError:
+    _streamlit_available = False
+
+def get_env_var(key, default=None):
+    """
+    Get environment variable from Streamlit secrets (if deployed) 
+    or from .env file (if local)
+    """
+    if _streamlit_available:
+        try:
+            # Try to get from Streamlit secrets first
+            if hasattr(st, 'secrets') and key in st.secrets:
+                return st.secrets[key]
+        except Exception:
+            pass
+    
+    # Fall back to environment variable (from .env or system)
+    return os.getenv(key, default)
 
 class Config:
     """Configuration class for the Workflow Procesare application"""
@@ -20,69 +43,69 @@ class Config:
     CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
     
     # Base directories - dynamic paths relative to config.py location
-    BASE_PATH = os.getenv("BASE_PATH", os.path.join(CURRENT_DIR, "Data-IN-OUT"))
-    PROJECT_PATH = os.getenv("PROJECT_PATH", CURRENT_DIR)
+    BASE_PATH = get_env_var("BASE_PATH", os.path.join(CURRENT_DIR, "Data-IN-OUT"))
+    PROJECT_PATH = get_env_var("PROJECT_PATH", CURRENT_DIR)
     
     # Step 1 - PDF to TXT
-    PDF_INPUT_DIR = os.getenv("PDF_INPUT_DIR", os.path.join(BASE_PATH, "01. Gemini OCR PDF to TXT", "IN"))
-    PDF_OUTPUT_DIR = os.getenv("PDF_OUTPUT_DIR", os.path.join(BASE_PATH, "01. Gemini OCR PDF to TXT", "OUT"))
+    PDF_INPUT_DIR = get_env_var("PDF_INPUT_DIR", os.path.join(BASE_PATH, "01. Gemini OCR PDF to TXT", "IN"))
+    PDF_OUTPUT_DIR = get_env_var("PDF_OUTPUT_DIR", os.path.join(BASE_PATH, "01. Gemini OCR PDF to TXT", "OUT"))
     
     # Step 2 - TXT to XLSX
-    TXT_INPUT_DIR = os.getenv("TXT_INPUT_DIR", os.path.join(BASE_PATH, "01. Gemini OCR PDF to TXT", "OUT"))
-    XLSX_OUTPUT_DIR = os.getenv("XLSX_OUTPUT_DIR", os.path.join(BASE_PATH, "02. Structurare TXT to XLSX"))
+    TXT_INPUT_DIR = get_env_var("TXT_INPUT_DIR", os.path.join(BASE_PATH, "01. Gemini OCR PDF to TXT", "OUT"))
+    XLSX_OUTPUT_DIR = get_env_var("XLSX_OUTPUT_DIR", os.path.join(BASE_PATH, "02. Structurare TXT to XLSX"))
     
     # Step 3 - PDF Copy
-    EXCEL_PATH = os.getenv("EXCEL_PATH", os.path.join(BASE_PATH, "02. Structurare TXT to XLSX", "2.structured_extract.xlsx"))
-    PDF_COPY_BASE_DIR = os.getenv("PDF_COPY_BASE_DIR", os.path.join(BASE_PATH, "03. PDF_Copy doc suport"))
+    EXCEL_PATH = get_env_var("EXCEL_PATH", os.path.join(BASE_PATH, "02. Structurare TXT to XLSX", "2.structured_extract.xlsx"))
+    PDF_COPY_BASE_DIR = get_env_var("PDF_COPY_BASE_DIR", os.path.join(BASE_PATH, "03. PDF_Copy doc suport"))
     
     # Step 4 - Date Validation
-    DATE_VALIDATION_INPUT = os.getenv("DATE_VALIDATION_INPUT", os.path.join(BASE_PATH, "02. Structurare TXT to XLSX", "2.structured_extract.xlsx"))
-    DATE_VALIDATION_OUTPUT = os.getenv("DATE_VALIDATION_OUTPUT", os.path.join(BASE_PATH, "04. Date si validare XLSX"))
+    DATE_VALIDATION_INPUT = get_env_var("DATE_VALIDATION_INPUT", os.path.join(BASE_PATH, "02. Structurare TXT to XLSX", "2.structured_extract.xlsx"))
+    DATE_VALIDATION_OUTPUT = get_env_var("DATE_VALIDATION_OUTPUT", os.path.join(BASE_PATH, "04. Date si validare XLSX"))
     
     # Step 5 - Monthly Expansion
-    MONTHLY_INPUT = os.getenv("MONTHLY_INPUT", os.path.join(BASE_PATH, "04. Date si validare XLSX", "4.transformed_data.xlsx"))
-    MONTHLY_OUTPUT = os.getenv("MONTHLY_OUTPUT", os.path.join(BASE_PATH, "05. Monthly Split Logic"))
+    MONTHLY_INPUT = get_env_var("MONTHLY_INPUT", os.path.join(BASE_PATH, "04. Date si validare XLSX", "4.transformed_data.xlsx"))
+    MONTHLY_OUTPUT = get_env_var("MONTHLY_OUTPUT", os.path.join(BASE_PATH, "05. Monthly Split Logic"))
     
     # ===========================================
     # API CONFIGURATION
     # ===========================================
     
     # Google Gemini API
-    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "your_gemini_api_key_here")
-    GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+    GEMINI_API_KEY = get_env_var("GEMINI_API_KEY", "your_gemini_api_key_here")
+    GEMINI_MODEL = get_env_var("GEMINI_MODEL", "gemini-2.0-flash")
     
     # API Processing Settings
-    API_BATCH_SIZE = int(os.getenv("API_BATCH_SIZE", "10"))
-    API_DELAY_SECONDS = int(os.getenv("API_DELAY_SECONDS", "2"))
-    API_MAX_RETRIES = int(os.getenv("API_MAX_RETRIES", "3"))
+    API_BATCH_SIZE = int(get_env_var("API_BATCH_SIZE", "10"))
+    API_DELAY_SECONDS = int(get_env_var("API_DELAY_SECONDS", "2"))
+    API_MAX_RETRIES = int(get_env_var("API_MAX_RETRIES", "3"))
     
     # ===========================================
     # PROCESSING CONFIGURATION
     # ===========================================
     
     # File Processing
-    MAX_WORKERS = int(os.getenv("MAX_WORKERS", "8"))
-    DEBUG_MODE = os.getenv("DEBUG_MODE", "False").lower() == "true"
-    ENABLE_CACHE = os.getenv("ENABLE_CACHE", "True").lower() == "true"
+    MAX_WORKERS = int(get_env_var("MAX_WORKERS", "8"))
+    DEBUG_MODE = get_env_var("DEBUG_MODE", "False").lower() == "true"
+    ENABLE_CACHE = get_env_var("ENABLE_CACHE", "True").lower() == "true"
     
     # Date Processing
-    DATE_FORMAT = os.getenv("DATE_FORMAT", "%d/%m/%Y")
-    FALLBACK_TO_INVOICE_MONTH = os.getenv("FALLBACK_TO_INVOICE_MONTH", "True").lower() == "true"
-    VAT_TOLERANCE = float(os.getenv("VAT_TOLERANCE", "0.001"))
+    DATE_FORMAT = get_env_var("DATE_FORMAT", "%d/%m/%Y")
+    FALLBACK_TO_INVOICE_MONTH = get_env_var("FALLBACK_TO_INVOICE_MONTH", "True").lower() == "true"
+    VAT_TOLERANCE = float(get_env_var("VAT_TOLERANCE", "0.001"))
     
     # ===========================================
     # OUTPUT CONFIGURATION
     # ===========================================
     
     # Excel Output
-    EXCEL_ENGINE = os.getenv("EXCEL_ENGINE", "openpyxl")
-    INCLUDE_HYPERLINKS = os.getenv("INCLUDE_HYPERLINKS", "True").lower() == "true"
-    AUTO_COLUMN_WIDTH = os.getenv("AUTO_COLUMN_WIDTH", "True").lower() == "true"
+    EXCEL_ENGINE = get_env_var("EXCEL_ENGINE", "openpyxl")
+    INCLUDE_HYPERLINKS = get_env_var("INCLUDE_HYPERLINKS", "True").lower() == "true"
+    AUTO_COLUMN_WIDTH = get_env_var("AUTO_COLUMN_WIDTH", "True").lower() == "true"
     
     # File Naming
-    OUTPUT_PREFIX = os.getenv("OUTPUT_PREFIX", "structured_extract")
-    TRANSFORMED_PREFIX = os.getenv("TRANSFORMED_PREFIX", "transformed_data")
-    EXPANDED_PREFIX = os.getenv("EXPANDED_PREFIX", "expanded_monthly_rows")
+    OUTPUT_PREFIX = get_env_var("OUTPUT_PREFIX", "structured_extract")
+    TRANSFORMED_PREFIX = get_env_var("TRANSFORMED_PREFIX", "transformed_data")
+    EXPANDED_PREFIX = get_env_var("EXPANDED_PREFIX", "expanded_monthly_rows")
     
     # ===========================================
     # HELPER METHODS

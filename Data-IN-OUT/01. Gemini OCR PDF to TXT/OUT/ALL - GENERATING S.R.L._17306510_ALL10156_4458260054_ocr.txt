@@ -1,0 +1,117 @@
+
+--- Page 1 ---
+VANZATOR
+Identificator 17306510
+Denumire ALL - GENERATING S.R.L.
+Identificatorul TVA RO17306510
+Nume ALL - GENERATING S.R.L.
+Nr. inregistrare J23/6266/2017
+Informatii juridice Capital social: 50000 LEI
+Strada Str. INDUSTRIILOR nr. 193
+Oras Chiajna
+Cod
+Regiun RO-IF
+Tara RO
+Adresa
+Persoana de contact
+Telefon
+E-mail
+
+RO eFactura
+Nr. factura ALL10156
+Codul tipului 380
+Data emitere 2024-10-08
+Data scadenta 2024-11-07
+Moneda facturii RON
+
+CUMPARATOR
+Denumire ALSIM ALARKO SANAYI TESISLERI VE TICARET ANONIM
+SIRKETI ISTANBUL - SUCURSALA BUCURESTI
+Strada B-DUL G-RAL VASILE MILEA, NR.2P, ET.2
+Oras SECTOR6
+Cod
+Regiune RO-B
+Tara RO
+Identificator RO40249290
+Nume ALSIM ALARKO SANAYI TESISLERI VE TICARET ANONIM
+SIRKETI ISTANBUL - SUCURSALA BUCURESTI
+Nr. inregistrare J40/17319/2018
+Adresa electronica
+Persoana de contact
+Telefon
+E-mail nina.negrescu@m6metrobucharest.com
+
+TOTAL NET 11090.41
+TOTAL PLATA 13197.59
+TOTAL 2107.18 RON
+
+VALOARE TOTALA fara TVA 11090.41
+VALOARE TOTALA cu TVA 13197.59
+TOTAL DEDUCERI
+TOTAL TAXE SUPLIMENTARE
+SUMA PLATITA
+VALOARE DE ROTUNJIRE
+
+DETALIEREA TVA
+Codul categoriei deS
+Cota TVA 19.00
+Baza de calcul 11090.41
+Valoare TVA 2107.18
+Codul motivului Motivul scutirii
+
+Linia Nume articol/Descriere articol
+1 Chirie grup electrogen HRYW17T5 B190 SN 211007735
+Perioada facturata: 01-30.09.2024
+500 EURO fara TVA/luna
+500EUR; Curs: 4.9770
+2 Chirie grup electrogen HRFW100T5 B70 SN 171005644
+Perioada facturata: 01-30.09.2024
+1100 Euro fara TVA/luna
+1100EUR; Curs: 4.9770
+3 Chirie grup electrogen HRYW17T5 B188 SN 211007733
+Perioada facturata: 01-30.09.2024
+500 EURO fara TVA/luna
+500EUR; Curs: 4.9770
+4 Chirie grup electrogen HRYW-45 B222 SN 221007167
+Perioada facturata: 24-30.09.2024
+550 Euro fara TVA/luna
+128.33EUR; Curs: 4.9770
+Instructiuni de plata
+
+Tara provenienta
+Pretul net al articolului
+2488.50
+5474.70
+2488.50
+91.24
+Moneda Cantitate de baza Cantitate facturata UM Cota TVA Valoare neta
+RON 1.000 1.000 MON 19.00 2488.50
+RON 1.000 1.000 MON 19.00 5474.70
+RON 1.000 1.000 MON 19.00 2488.50
+RON 7.000 7.000 DAY 19.00 638.71
+Pagina 1 din 2
+
+
+--- Page 2 ---
+Codul tipului de instrument de 42
+Nr. cont de plata RO76CECEB10830RON2587929
+Numele contului de plata CEC BANK SA - RON
+Instructiuni de plata
+Codul tipului de instrument de 42
+Nr. cont de plata
+Numele contului de plata ROCREDIT BANK RO47 MIRO 0000
+- RON
+Instructiuni de plata
+Codul tipului de instrument de 42
+Nr. cont de plata RO74TREZ4215069XXX014191
+Instructiuni de plata
+Codul tipului de instrument de 42
+Nr. cont de plata
+Numele contului de plata ROCREDIT BANK RO70 MIRO 0000
+- EUR
+Nota:
+Locatie: METROU MAGISTRALA 6
+Prezenta factur circul însoit de Termenii i condiiile care guverneaz relaiile comerciale dintre Furnizor i Client.
+Id recipisa: 4458260054 | Data recipisa: 09.10.2024
+Pagina 2 din 2
+
